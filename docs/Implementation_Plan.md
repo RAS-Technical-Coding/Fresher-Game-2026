@@ -4,7 +4,7 @@
 
 To parallelize the work effectively, here is the suggested role distribution and folder ownership for your 7-member team:
 
-1. **Team Lead & Integration (You)** - `src/core/`
+1. **Team Lead & Integration ** - `src/core/`
    - **Role:** Set up the initial project scaffold, ensure modules communicate correctly, and manage the central Game Loop.
 2. **UI/UX Developer** - `src/ui/`
    - **Role:** Build the responsive HTML layout, CSS styling, the command input box (or chat log), timer display, and score/status panels.
