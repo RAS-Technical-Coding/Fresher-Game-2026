@@ -23,23 +23,23 @@ To parallelize the work effectively, here is the suggested role distribution and
 
 ## 4-Phase Implementation Plan
 
-### Phase 1: Skeleton & Setup (Days 1-2)
+### Phase 1: Skeleton & Setup
 - Initialize the Git repository.
 - Setup basic HTML structure with a blank `<canvas>` and an `<input>` field.
 - **Canvas Team:** Draw a basic static grid and place placeholder colored squares for the Robot, Box, and Drop Zone.
 - **Interpreter Team:** Write a basic JS function that splits a string by commas and spaces to extract commands.
 
-### Phase 2: Core Mechanics (Days 3-5)
+### Phase 2: Core Mechanics
 - **Logic Team:** Implement coordinate generation ensuring the box and drop zone never overlap the robot's start position. Add basic distance-checking functions (collision).
 - **Movement Team:** Make the robot instantly jump to coordinates based on simple commands (no animation yet, just logic verification).
 - **UI Team:** Connect the command input box so it sends text to the Interpreter when "Enter" or "Send" is pressed.
 
-### Phase 3: Animation & Polish (Days 6-8)
+### Phase 3: Animation & Polish
 - **Movement & Canvas Teams:** Implement `requestAnimationFrame`. When a command like `FWD 100` is read, smoothly animate the robot's X/Y over a set duration. Animate rotation for `TURN`.
 - **Logic Team:** Combine the "GRIP" command with collision detection. If the robot is within threshold of the box, visually attach the box to the robot.
 - **UI Team:** Hook up the 2-minute countdown timer and game over / victory modals.
 
-### Phase 4: Testing & Balancing (Days 9-10)
+### Phase 4: Testing & Balancing
 - **QA:** Playtest the game. Check edge cases like the robot moving out of bounds, trying to grip thin air, or sending empty commands.
 - Adjust movement speed and turning speed to ensure tasks are doable within the 2-minute time limit but still challenging.
 
