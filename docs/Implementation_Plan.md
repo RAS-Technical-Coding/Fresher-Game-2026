@@ -1,56 +1,74 @@
-# Freshers' Day Robot Game - Implementation Plan
+# 8-Bit Retro Robot Game - Implementation Plan
 
-## Team Structure & Roles (7 Members)
-
-1. **Team Lead & Integration ** - `src/core/`
-   - **Role:** Set up the initial project scaffold, ensure modules communicate correctly, and manage the central Game Loop.
-2. **UI/UX Developer** - `src/ui/`
-   - **Role:** Build the responsive HTML layout, CSS styling, the command input box (or chat log), timer display, and score/status panels.
-3. **Canvas & Graphics Engine Developer** - `src/canvas/`
-   - **Role:** Work purely on HTML5 Canvas. Draw the arena grid, render the robot sprite with rotation, draw the pick-up box, and the drop zone.
-4. **Command Interpreter Engineer** - `src/interpreter/`
-   - **Role:** Build the parsing engine. Take raw string inputs (e.g., `TURN L 60, FWD 100, GRIP`) and convert them into structured JSON action queues.
-5. **Game State Controller** - `src/logic/`
-   - **Role:** Implement the randomizer (generating valid X/Y coords for spawn and drop), timer countdown logic, and collision detection for gripping/dropping.
-6. **Animation & Movement Specialist** - `src/core/` & `src/canvas/`
-   - **Role:** Translate the parsed commands into smooth visual transitions. Calculate vector movements, rotation interpolation, and handle the "holding box" visual state.
-7. **QA Tester & Asset Manager** - `src/assets/` & `tests/`
-   - **Role:** Source or create 2D sprites (robot, box, zones), sound effects, and write edge-case test sequences to ensure the game doesn't break if a user enters weird commands.
+## The Aesthetic: 8-Bit Retro / CRT Arcade
+The game will have a strong retro arcade feel:
+- **Visuals:** CRT monitor curvature, scanlines, pixelated 8-bit fonts, and side-bar glitch aesthetics.
+- **Audio:** Chiptune background music and 8-bit sound effects (beeps, boops) for actions.
+- **Movement:** Instead of smooth modern interpolation, the robot should move with snappy, frame-by-frame 8-bit style animations.
 
 ---
 
-## 4-Phase Implementation Plan
+## Team Roles
 
-### Phase 1: Skeleton & Setup
-- Initialize the Git repository.
-- Setup basic HTML structure with a blank `<canvas>` and an `<input>` field.
-- **Canvas Team:** Draw a basic static grid and place placeholder colored squares for the Robot, Box, and Drop Zone.
-- **Interpreter Team:** Write a basic JS function that splits a string by commas and spaces to extract commands.
+### 1. Team Lead & Integration:
+- **Role:** Wire everything together. Ensure the UI triggers the Interpreter, which updates the Logic, which tells the Canvas to render.
+- **Key Task:** Manage GitHub merge conflicts and keep everyone on schedule.
 
-### Phase 2: Core Mechanics
-- **Logic Team:** Implement coordinate generation ensuring the box and drop zone never overlap the robot's start position. Add basic distance-checking functions (collision).
-- **Movement Team:** Make the robot instantly jump to coordinates based on simple commands (no animation yet, just logic verification).
-- **UI Team:** Connect the command input box so it sends text to the Interpreter when "Enter" or "Send" is pressed.
+### 2. UI/UX Developer (`src/ui/`):
+- **Role:** Build the HTML/CSS layout focusing entirely on the Retro Aesthetic.
+- **Key Tasks:** 
+  - Add a CRT scanline overlay using CSS (pointer-events: none).
+  - Source and implement an 8-bit web font (like 'Press Start 2P').
+  - Style the command input box and timer to look like a vintage terminal.
 
-### Phase 3: Animation & Polish
-- **Movement & Canvas Teams:** Implement `requestAnimationFrame`. When a command like `FWD 100` is read, smoothly animate the robot's X/Y over a set duration. Animate rotation for `TURN`.
-- **Logic Team:** Combine the "GRIP" command with collision detection. If the robot is within threshold of the box, visually attach the box to the robot.
-- **UI Team:** Hook up the 2-minute countdown timer and game over / victory modals.
+### 3. Canvas & Graphics Engine (`src/canvas/`):
+- **Role:** Render the game world in an 8-bit style.
+- **Key Tasks:** 
+  - Draw a blocky, high-contrast grid.
+  - Render the robot, the box, and the drop zone using pixel-art sprites instead of vector shapes.
 
-### Phase 4: Testing & Balancing
-- **QA:** Playtest the game. Check edge cases like the robot moving out of bounds, trying to grip thin air, or sending empty commands.
-- Adjust movement speed and turning speed to ensure tasks are doable within the 2-minute time limit but still challenging.
+### 4. Command Interpreter Engineer (`src/interpreter/`):
+- **Role:** Parse the player's text commands.
+- **Key Tasks:** 
+  - Write regex or string splitting functions to convert `TURN L 60, FWD 100` into `[{action: 'turn', dir: 'L', val: 60}, {action: 'move', val: 100}]`.
+
+### 5. Game State Controller (`src/logic/`):
+- **Role:** Handle the core rules of the game.
+- **Key Tasks:** 
+  - Implement a rigorous 2-minute countdown timer.
+  - Build the randomizer to spawn the robot and boxes on a grid system (e.g., 10x10 tiles) instead of exact pixel coordinates to fit the retro theme.
+
+### 6. Animation & Movement (`src/core/`):
+- **Role:** Move the robot across the Canvas based on the logic state.
+- **Key Tasks:** 
+  - Translate the parsed commands into movement.
+  - Implement "snappy" grid-based movement (moving from tile to tile) rather than smooth fluid movement, to match the 8-bit vibe.
+
+### 7. Asset Creator & QA Tester (`src/assets/`):
+- **Role:** Source the retro assets and break the game.
+- **Key Tasks:** 
+  - Find free 8-bit sound effects (sfxr/bfxr is great for this).
+  - Find or draw simple 16x16 or 32x32 pixel sprites.
+  - Aggressively playtest the command inputs to find bugs.
 
 ---
 
-## Folder Structure
+### 4 Phase Implementation:
 
-The following directories have been created:
-* `src/assets/` - Images, sprites, and sounds.
-* `src/ui/` - HTML layout, CSS styles, DOM manipulation scripts.
-* `src/canvas/` - Grid rendering, entity drawing, visual feedback.
-* `src/interpreter/` - String parsing and command queuing.
-* `src/logic/` - Game state, collisions, math helpers, randomizer.
-* `src/core/` - Main game loop, central event bus tying it all together.
-* `docs/` - Documentation, API specs for team members.
-* `tests/` - QA test scripts and command sequence test cases.
+### Barebones & Aesthetics:
+- **UI & Assets:** Lock in the CRT CSS overlay, fonts, and background colors. Find all sprites and sounds.
+- **Interpreter & Logic:** Get the basic command parser working and generate the randomized grid coordinates.
+- **Canvas:** Draw the static grid and placeholder squares for entities.
+
+### Wiring it Together:
+- **Lead & Movement:** Connect the Input Box -> Interpreter -> Movement Logic -> Canvas.
+- Make the robot physically jump from tile to tile when commands are submitted.
+- Add collision detection for picking up and dropping the box.
+
+### Polish & Playtest:
+- Implement the 2-minute timer and win/loss screens (styled as "GAME OVER" arcade screens).
+- Add the 8-bit sound effects.
+- QA tester runs through various edge-case command sequences.
+
+### Delivery:
+- Final bug fixes and deployment for Freshers' Day!
