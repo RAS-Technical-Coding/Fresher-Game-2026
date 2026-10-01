@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Controller - IEEE RAS</title>
+    <style>
+        body {
+            background-color: #111;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            box-sizing: border-box;
+            touch-action: manipulation;
+        }
+        h2 {
+            margin-top: 0;
+        }
+        .container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .wheel-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .wheel {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 4px solid #fff;
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .wheel-center {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .buttons-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: flex-end;
+            padding-right: 20px;
+        }
+        .btn {
+            background-color: transparent;
+            color: #fff;
+            border: 2px solid #fff;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            width: 150px;
+            text-align: center;
+            cursor: pointer;
+            user-select: none;
+        }
+        .btn:active {
+            background-color: #fff;
+            color: #000;
+        }
+        .btn.exec {
+            margin-top: 10px;
+            border-width: 4px;
+            font-weight: bold;
+        }
+        #disconnected-msg {
+            display: none;
+            text-align: center;
+            font-size: 1.5rem;
+            color: #f00;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+
+    <h2 id="status-title">Player's Side</h2>
+
+    <div id="disconnected-msg">
+        Game Over.<br><br>Connection closed.<br>Thank you for playing!
+    </div>
+
+    <div class="container" id="controller-ui">
+        <!-- Angle radial wheel -->
+        <div class="wheel-container">
+            <div class="wheel" id="joystick">
+                <div class="wheel-center"></div>
+            </div>
+            <div>Angle radial wheel</div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="buttons-container">
+            <div class="btn" onclick="sendCommand('TURN_R')">Turn R</div>
+            <div class="btn" onclick="sendCommand('TURN_L')">Turn L</div>
+            <div class="btn" onclick="sendCommand('GRAB')">GRAB</div>
+            <div class="btn" onclick="sendCommand('DROP')">Drop</div>
+            <div class="btn exec" onclick="sendCommand('EXEC')">EXEC</div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const uiContainer = document.getElementById('controller-ui');
+        const discMsg = document.getElementById('disconnected-msg');
+        const statusTitle = document.getElementById('status-title');
+
+        socket.on('connect', () => {
+            socket.emit('register_role', 'controller');
+        });
+
+        socket.on('game_full', () => {
+            uiContainer.style.display = 'none';
+            statusTitle.style.display = 'none';
+            discMsg.style.display = 'block';
+            discMsg.innerHTML = 'Game is currently full.<br>Please wait for the current player to finish.';
+        });
+
+        socket.on('force_disconnect', (data) => {
+            uiContainer.style.display = 'none';
+            statusTitle.style.display = 'none';
+            discMsg.style.display = 'block';
+            discMsg.innerHTML = `${data.reason}.<br><br>Connection closed.<br>Thank you for playing!`;
+        });
+
+        socket.on('disconnect', () => {
+            uiContainer.style.display = 'none';
+            statusTitle.style.display = 'none';
+            discMsg.style.display = 'block';
+        });
+
+        function sendCommand(action) {
+            socket.emit('controller_command', { action: action, val: null });
+            
+            // Add slight haptic feedback if supported by browser/device
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+        }
+        
+        // Basic drag logic for the wheel could be implemented here
+        // Currently it acts as a visual placeholder based on the drawings
+    </script>
+</body>
+</html>

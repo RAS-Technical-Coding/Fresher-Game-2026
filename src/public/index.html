@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IEEE RAS START - Host Screen</title>
+    <style>
+        body {
+            background-color: #000;
+            color: #0f0;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            text-align: center;
+            flex-direction: column;
+        }
+        #qr-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #game-container {
+            display: none;
+            width: 80%;
+            height: 80%;
+            border: 2px solid #0f0;
+            position: relative;
+        }
+        /* CRT overlay placeholder */
+        .crt::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 2;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+        .instruction {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+        #command-log {
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 250px;
+            height: 100%;
+            border-left: 2px solid #0f0;
+            text-align: left;
+            padding: 10px;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body class="crt">
+    
+    <div id="qr-container">
+        <h1>IEEE RAS START</h1>
+        <div class="instruction">Scan the QR code to become the controller</div>
+        <img id="qr-image" src="" alt="QR Code" />
+    </div>
+
+    <div id="game-container">
+        <h2>GAME VIEW</h2>
+        <!-- Game Canvas would go here -->
+        
+        <div id="command-log">
+            <h3>CODER / INSTRUCTION</h3>
+            <ul id="log-list"></ul>
+        </div>
+        
+        <button id="dev-gameover" style="position:absolute; bottom:10px; left:10px; background:#f00; color:#fff; border:none; padding:10px; cursor:pointer; z-index: 10;">Simulate Game Over</button>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        socket.emit('register_role', 'host');
+
+        const qrContainer = document.getElementById('qr-container');
+        const gameContainer = document.getElementById('game-container');
+        const logList = document.getElementById('log-list');
+
+        // Fetch the QR code
+        fetch('/api/qr')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('qr-image').src = data.qr;
+            });
+
+        // Player connected
+        socket.on('player_connected', () => {
+            qrContainer.style.display = 'none';
+            gameContainer.style.display = 'block';
+            addLog('Player Connected. Game Started.');
+        });
+
+        // Player disconnected or game reset
+        socket.on('player_disconnected', () => {
+            addLog('Player Disconnected.');
+            resetToQR();
+        });
+        
+        socket.on('reset_to_qr', () => {
+            resetToQR();
+        });
+
+        // Handle commands from the mobile controller
+        socket.on('game_command', (cmd) => {
+            addLog(`Command: ${cmd.action} ${cmd.val || ''}`);
+        });
+
+        function addLog(msg) {
+            const li = document.createElement('li');
+            li.textContent = msg;
+            logList.appendChild(li);
+            if(logList.childElementCount > 15) {
+                logList.removeChild(logList.firstChild);
+            }
+        }
+
+        function resetToQR() {
+            qrContainer.style.display = 'flex';
+            gameContainer.style.display = 'none';
+            logList.innerHTML = '';
+        }
+
+        // For development/testing
+        document.getElementById('dev-gameover').addEventListener('click', () => {
+            addLog('Triggering Game Over...');
+            socket.emit('game_over');
+        });
+    </script>
+</body>
+</html>
