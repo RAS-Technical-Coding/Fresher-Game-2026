@@ -2,8 +2,6 @@
 
 ## Team Structure & Roles (7 Members)
 
-To parallelize the work effectively, here is the suggested role distribution and folder ownership for your 7-member team:
-
 1. **Team Lead & Integration ** - `src/core/`
    - **Role:** Set up the initial project scaffold, ensure modules communicate correctly, and manage the central Game Loop.
 2. **UI/UX Developer** - `src/ui/`
@@ -47,7 +45,7 @@ To parallelize the work effectively, here is the suggested role distribution and
 
 ## Folder Structure
 
-The following directories have been created in your workspace:
+The following directories have been created:
 * `src/assets/` - Images, sprites, and sounds.
 * `src/ui/` - HTML layout, CSS styles, DOM manipulation scripts.
 * `src/canvas/` - Grid rendering, entity drawing, visual feedback.
