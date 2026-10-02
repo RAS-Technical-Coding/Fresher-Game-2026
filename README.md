@@ -1,114 +1,89 @@
-# IEEE RAS Robot Run — Fresher Game 2026
+# Freshers-Game-2026
 
-A two-screen arcade game for the IEEE RAS fresher event:
+# 8-Bit Retro Robot Game - Implementation Plan
 
-- **Host/laptop:** displays the CRT-style arcade game, QR code, 10×10 game board, timer, score and live robot telemetry.
-- **Phone:** acts as the player's controller. The player builds a command sequence and presses **EXECUTE SEQUENCE**.
-- **Networking:** Node.js + Express + Socket.IO, with one controller per round.
+## The Architecture: Remote Mobile Controller & QR System
+To support a dynamic, interactive experience for freshers, the game operates on a **Second-Screen Client-Server Architecture**:
+- **Host System (Laptop/Server):** Runs a Node.js web server with WebSockets (Socket.io). It displays the main game visual on the laptop. When idle, it shows a large QR code.
+- **Controller System (Mobile):** When a user scans the QR code, their phone connects to the session. The phone displays the controller interface (radial wheel, action buttons).
+- **Session Flow:** 
+  1. Laptop shows "IEEE RAS START" and a QR Code.
+  2. Player scans QR and connects -> Game starts on laptop.
+  3. Player inputs commands on phone (Turn R/L, Grab, Drop, Exec) which are sent in real-time to the laptop.
+  4. Game Over (Win/Loss/Timeout) -> Connection to phone is terminated, phone UI closes, and Laptop generates a new session/QR for the next player.
 
-## Requirements implemented
+## The Aesthetic: 8-Bit Retro / CRT Arcade
+The game will have a strong retro arcade feel on both the Host and the Mobile Controller:
+- **Visuals:** CRT monitor curvature, scanlines, pixelated 8-bit fonts, and side-bar glitch aesthetics.
+- **Audio:** Chiptune background music and 8-bit sound effects (beeps, boops) for actions.
+- **Movement:** Instead of smooth modern interpolation, the robot should move with snappy, frame-by-frame 8-bit style animations.
 
-1. Host idle/attract screen with IEEE RAS branding and a dynamic QR code.
-2. Phone scans the QR and joins the current session.
-3. One-player-at-a-time session locking.
-4. Random robot/core/target positions on a 10×10 grid.
-5. 120-second mission timer.
-6. Phone controls: radial movement input, TURN L, TURN R, GRAB CORE, DROP CORE and EXECUTE SEQUENCE.
-7. Command validation through `CommandInterpreter`.
-8. Existing `RobotMovement` remains the movement foundation.
-9. Existing `MovementAnimator` is used by the host to animate every movement snapshot tile-by-tile.
-10. GRAB only succeeds on the core; DROP only wins on the target.
-11. Score and mission-complete / timeout states.
-12. Controller is disconnected at game end and the host creates a fresh session/QR.
-13. The host canvas has a runtime renderer fallback and a `ResizeObserver`, so the game board still initializes correctly when the game screen changes from hidden to visible.
-14. LAN-address detection prefers the default network route and avoids common virtual-adapter addresses such as VMware/VirtualBox when possible.
-15. QR generation has a visible URL fallback so the controller link is still available if QR rendering fails.
+---
 
-## Run on Windows
+## Team Roles
 
-From the folder containing `package.json`:
+### 1. Team Lead & Integration (`src/server/`):
+- **Role:** Set up the Node.js/Express server and Socket.io web sockets. Manage the overarching architecture.
+- **Key Task:** Wire the Mobile Controller events to the Host Game instance, handle session IDs, generate the QR codes dynamically, and enforce the "one player at a time" connection flow.
 
-```powershell
-npm install
-npm test
-npm start
-```
+### 2. UI/UX Developer (`src/ui/`):
+- **Role:** Build the HTML/CSS layouts for BOTH the Laptop Host screen and the Mobile Controller screen.
+- **Key Tasks:** 
+  - Add a CRT scanline overlay using CSS (pointer-events: none).
+  - Source and implement an 8-bit web font (like 'Press Start 2P').
+  - Build the Mobile UI: Angle radial wheel, "Turn R", "Turn L", "GRAB", "Drop", and "EXEC" buttons. 
 
-Open the host on the laptop:
+### 3. Canvas & Graphics Engine (`src/canvas/`):
+- **Role:** Render the game world in an 8-bit style on the Laptop Host screen.
+- **Key Tasks:** 
+  - Draw a blocky, high-contrast grid.
+  - Render the robot, the box, and the drop zone using pixel-art sprites instead of vector shapes.
 
-```text
-http://localhost:3000
-```
+### 4. Command Interpreter Engineer (`src/interpreter/`):
+- **Role:** Parse the mobile controller inputs.
+- **Key Tasks:** 
+  - Translate the WebSocket payloads (e.g., `{action: 'EXEC', queue: ['TURN_R', 'MOVE_45']}`) into the logic the game engine can process.
 
-Connect the phone and laptop to the **same Wi-Fi network**, then scan the QR displayed by the host.
+### 5. Game State Controller (`src/logic/`):
+- **Role:** Handle the core rules of the game on the Host side.
+- **Key Tasks:** 
+  - Implement a rigorous 2-minute countdown timer.
+  - Build the randomizer to spawn the robot and boxes on a grid system (e.g., 10x10 tiles).
+  - Trigger "Game Over" and notify the server to disconnect the mobile client.
 
-## Project structure
+### 6. Animation & Movement (`src/core/`):
+- **Role:** Move the robot across the Canvas based on the logic state.
+- **Key Tasks:** 
+  - Translate the parsed commands into movement.
+  - Implement "snappy" grid-based movement (moving from tile to tile) to match the 8-bit vibe.
 
-```text
-src/
-├── core/
-│   ├── RobotMovement.js
-│   └── MovementAnimator.js
-├── logic/
-│   └── GameManager.js
-├── interpreter/
-│   └── CommandInterpreter.js
-├── canvas/
-│   └── GameRenderer.js
-├── server/
-│   ├── sessionManager.js
-│   └── socketManager.js
-├── public/
-│   ├── index.html
-│   ├── controller.html
-│   └── MovementAnimator.js
-└── server.js
-```
+### 7. Asset Creator & QA Tester (`src/assets/`):
+- **Role:** Source the retro assets and break the game.
+- **Key Tasks:** 
+  - Find free 8-bit sound effects.
+  - Find or draw simple 16x16 or 32x32 pixel sprites.
+  - Test the latency between mobile taps and laptop rendering.
 
-## Game flow
+---
 
-```text
-HOST IDLE
-   ↓
-QR / SESSION
-   ↓
-PHONE CONNECTS
-   ↓
-RANDOM 10×10 MISSION
-   ↓
-PHONE BUILDS COMMAND QUEUE
-   ↓
-EXECUTE
-   ↓
-SOCKET.IO
-   ↓
-COMMAND INTERPRETER
-   ↓
-GAME MANAGER + ROBOT MOVEMENT
-   ↓
-HOST ANIMATES TILE-BY-TILE
-   ↓
-GRAB CORE → REACH TARGET → DROP
-   ↓
-WIN / TIMEOUT
-   ↓
-CONTROLLER DISCONNECTS
-   ↓
-FRESH SESSION + QR
-```
+### 4 Phase Implementation:
 
-## Validation performed
+### Phase 1: Server Skeleton & Connection Flow
+- Initialize Node.js + Express + Socket.io.
+- Create dynamic URL generation and display QR codes on the Laptop.
+- Build the basic Mobile Controller view to connect, send a test ping, and disconnect cleanly when reset.
 
-- All automated tests pass: **32/32** (28 core movement/animation tests + 4 host/controller/server UI integration checks).
-- Server-side JavaScript syntax checked successfully.
-- Host and controller inline browser JavaScript syntax checked successfully.
-- Game-manager smoke test completed successfully for a complete `MOVE → GRAB → MOVE → DROP` mission.
+### Phase 2: Barebones & Aesthetics
+- **UI & Assets:** Lock in the CRT CSS overlay, fonts, and background colors.
+- **Controller UI:** Implement the radial wheel and command buttons on the mobile view.
+- **Canvas:** Draw the static grid and placeholder squares for entities on the laptop view.
 
+### Phase 3: Wiring it Together
+- Connect Mobile Button Presses -> Socket.io -> Laptop Command Interpreter -> Movement Logic -> Canvas.
+- Make the robot physically jump from tile to tile when the "EXEC" command is fired from the phone.
+- Add collision detection for picking up and dropping the box.
 
-## Controller / Game Requirements
-- The phone uses a radial MOVE control. Drag from the center to choose a movement angle (0–359°) and distance (10–250 px).
-- The arena maps 50 px to one grid cell, so a `MOVE 50px @ 90°` command moves one cell right.
-- TURN L/R uses a selectable 30°, 45°, 60°, or 90° rotation. Robot movement does not change its rotation.
-- The host shows the robot rotation and the latest movement vector (angle + distance) visually.
-- GRIP/GRAB and DROP remain discrete commands.
-- Pickup/drop cells randomize for every new player session.
+### Phase 4: Polish & Playtest
+- Implement the 2-minute timer and win/loss screens ("GAME OVER").
+- Server aggressively disconnects the phone client on Game Over to prepare for the next fresher.
+- Add the 8-bit sound effects and test network latency over local Wi-Fi.
