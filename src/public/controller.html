@@ -1,164 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Controller - IEEE RAS</title>
-    <style>
-        body {
-            background-color: #111;
-            color: #fff;
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            height: 100vh;
-            box-sizing: border-box;
-            touch-action: manipulation;
-        }
-        h2 {
-            margin-top: 0;
-        }
-        .container {
-            display: flex;
-            width: 100%;
-            height: 100%;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .wheel-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .wheel {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            border: 4px solid #fff;
-            position: relative;
-            margin-bottom: 20px;
-        }
-        .wheel-center {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            border: 2px solid #fff;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-        .buttons-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            align-items: flex-end;
-            padding-right: 20px;
-        }
-        .btn {
-            background-color: transparent;
-            color: #fff;
-            border: 2px solid #fff;
-            padding: 15px 30px;
-            font-size: 1.2rem;
-            text-transform: uppercase;
-            width: 150px;
-            text-align: center;
-            cursor: pointer;
-            user-select: none;
-        }
-        .btn:active {
-            background-color: #fff;
-            color: #000;
-        }
-        .btn.exec {
-            margin-top: 10px;
-            border-width: 4px;
-            font-weight: bold;
-        }
-        #disconnected-msg {
-            display: none;
-            text-align: center;
-            font-size: 1.5rem;
-            color: #f00;
-            margin-top: 50px;
-        }
-    </style>
-</head>
-<body>
-
-    <h2 id="status-title">Player's Side</h2>
-
-    <div id="disconnected-msg">
-        Game Over.<br><br>Connection closed.<br>Thank you for playing!
-    </div>
-
-    <div class="container" id="controller-ui">
-        <!-- Angle radial wheel -->
-        <div class="wheel-container">
-            <div class="wheel" id="joystick">
-                <div class="wheel-center"></div>
-            </div>
-            <div>Angle radial wheel</div>
-        </div>
-
-        <!-- Buttons -->
-        <div class="buttons-container">
-            <div class="btn" onclick="sendCommand('TURN_R')">Turn R</div>
-            <div class="btn" onclick="sendCommand('TURN_L')">Turn L</div>
-            <div class="btn" onclick="sendCommand('GRAB')">GRAB</div>
-            <div class="btn" onclick="sendCommand('DROP')">Drop</div>
-            <div class="btn exec" onclick="sendCommand('EXEC')">EXEC</div>
-        </div>
-    </div>
-
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-        const socket = io();
-        const uiContainer = document.getElementById('controller-ui');
-        const discMsg = document.getElementById('disconnected-msg');
-        const statusTitle = document.getElementById('status-title');
-
-        socket.on('connect', () => {
-            socket.emit('register_role', 'controller');
-        });
-
-        socket.on('game_full', () => {
-            uiContainer.style.display = 'none';
-            statusTitle.style.display = 'none';
-            discMsg.style.display = 'block';
-            discMsg.innerHTML = 'Game is currently full.<br>Please wait for the current player to finish.';
-        });
-
-        socket.on('force_disconnect', (data) => {
-            uiContainer.style.display = 'none';
-            statusTitle.style.display = 'none';
-            discMsg.style.display = 'block';
-            discMsg.innerHTML = `${data.reason}.<br><br>Connection closed.<br>Thank you for playing!`;
-        });
-
-        socket.on('disconnect', () => {
-            uiContainer.style.display = 'none';
-            statusTitle.style.display = 'none';
-            discMsg.style.display = 'block';
-        });
-
-        function sendCommand(action) {
-            socket.emit('controller_command', { action: action, val: null });
-            
-            // Add slight haptic feedback if supported by browser/device
-            if (navigator.vibrate) {
-                navigator.vibrate(50);
-            }
-        }
-        
-        // Basic drag logic for the wheel could be implemented here
-        // Currently it acts as a visual placeholder based on the drawings
-    </script>
-</body>
-</html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>IEEE RAS // RADIAL CONTROLLER</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap');
+:root{--cyan:#00f6ff;--lime:#dfff3f;--orange:#ff9f1c;--red:#ff3864}*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;min-height:100%;background:radial-gradient(circle at 50% 20%,#10232a,#030609 65%);color:#dffaff;font-family:'Share Tech Mono',Consolas,monospace;touch-action:manipulation}body:before{content:"";position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 4px);z-index:10}.app{min-height:100vh;display:flex;flex-direction:column;padding:14px max(14px,env(safe-area-inset-left)) max(12px,env(safe-area-inset-bottom));max-width:560px;margin:auto}header{display:flex;justify-content:space-between;align-items:center;border:1px solid #173943;background:#071117;padding:12px 13px}.brand{font:10px/1.7 'Press Start 2P'}.brand span{color:var(--cyan)}.link{font-size:11px;color:#6f929b}.link i{display:inline-block;width:7px;height:7px;border-radius:50%;background:#56666b;margin-right:5px}.link.online i{background:var(--cyan);box-shadow:0 0 9px var(--cyan)}.timer{font:11px 'Press Start 2P';color:var(--lime);margin-top:4px}.mission{padding:10px 2px 4px;font-size:11px;color:#577780;display:flex;justify-content:space-between}.mission #message{color:var(--cyan)}.clear{border:0;background:none;color:#52747d;font:10px 'Share Tech Mono';padding:5px}.deck{flex:1;display:flex;flex-direction:column;justify-content:center}.dial-title{display:flex;justify-content:space-between;color:#6c9098;font-size:10px;margin:8px 0}.dial-title b{color:var(--cyan)}.dial-wrap{display:flex;justify-content:center;margin:2px 0 10px}.dial{width:min(78vw,320px);height:min(78vw,320px);border-radius:50%;position:relative;border:2px solid #20505a;background:radial-gradient(circle,#11262d 0,#071116 57%,#030608 58%);box-shadow:inset 0 0 35px rgba(0,246,255,.09),0 0 35px rgba(0,246,255,.08);touch-action:none;user-select:none}.dial:before{content:"";position:absolute;inset:15%;border-radius:50%;border:1px dashed #1d4b55}.dial:after{content:"";position:absolute;left:50%;top:50%;width:1px;height:44%;background:rgba(0,246,255,.16);transform-origin:bottom;pointer-events:none}.vector{position:absolute;left:50%;top:50%;height:39%;width:4px;transform-origin:50% 100%;background:linear-gradient(var(--cyan),transparent);filter:drop-shadow(0 0 7px var(--cyan));pointer-events:none}.vector:after{content:"";position:absolute;top:-2px;left:-6px;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:15px solid var(--cyan)}.hub{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:34%;height:34%;border-radius:50%;border:2px solid var(--cyan);background:#07151b;box-shadow:0 0 25px rgba(0,246,255,.22);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2}.hub strong{font:10px 'Press Start 2P';color:var(--cyan)}.hub span{font-size:9px;color:#668990;margin-top:8px}.ring-label{position:absolute;font:9px 'Press Start 2P';color:#52747d}.r0{top:5%;left:50%;transform:translateX(-50%)}.r90{right:4%;top:50%;transform:translateY(-50%)}.r180{bottom:5%;left:50%;transform:translateX(-50%)}.r270{left:4%;top:50%;transform:translateY(-50%)}.readouts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-bottom:10px}.readout{border:1px solid #173943;background:#050c10;padding:9px;text-align:center}.readout b{display:block;color:#4f747d;font-size:9px;margin-bottom:5px}.readout span{color:#dffaff;font-size:12px}.turn-panel{border:1px solid #173943;background:#071117;padding:10px;margin-bottom:10px}.turn-head{display:flex;justify-content:space-between;color:#6b8e97;font-size:10px;margin-bottom:8px}.angles{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.angle{min-height:42px;background:#061014;border:1px solid #214852;color:#9fc5cb;font:10px 'Press Start 2P'}.angle.selected{border-color:var(--lime);color:var(--lime);box-shadow:0 0 12px rgba(223,255,63,.12)}.turns{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:7px}.btn{min-height:54px;border:1px solid #214852;background:linear-gradient(#0b1b21,#061014);color:#dffaff;font:10px 'Press Start 2P'}.btn:active,.btn.pressed{transform:translateY(2px);border-color:var(--cyan);background:#102c35}.grab{color:var(--orange)}.drop{color:var(--lime)}.adjust{color:var(--cyan);border-color:var(--cyan);display:block}.adjust[hidden]{display:none}.exec{width:100%;min-height:62px;margin-top:8px;border:2px solid var(--cyan);color:var(--cyan);font:11px 'Press Start 2P';background:#061014}.queue-title{display:flex;justify-content:space-between;margin-top:10px;color:#52747d;font-size:10px}.queue{height:55px;margin-top:5px;display:flex;gap:6px;overflow:auto;padding:6px;border:1px solid #15363e;background:#050c10}.chip{flex:0 0 auto;padding:8px;border:1px solid #24515a;color:#b9edf1;font-size:9px;background:#0a171d}.status-line{margin-top:7px;text-align:center;color:#4d7079;font-size:10px;min-height:14px}.overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;text-align:center;background:rgba(1,4,6,.97);z-index:30;padding:30px}.overlay.show{display:flex}.modal{border:1px solid var(--cyan);padding:35px 22px;max-width:390px}.modal h1{font:20px 'Press Start 2P';color:var(--lime);line-height:1.7}.modal p{color:#719099;line-height:1.6}
+</style></head><body><div class="app"><header><div class="brand"><span>IEEE RAS</span><br>ROBOT RUN</div><div><div class="link" id="link"><i></i><span id="linkText">CONNECTING</span></div><div class="timer" id="timer">02:00</div></div></header><div class="mission"><span id="message">WAITING FOR MISSION...</span><button class="clear" id="clear" type="button">CLEAR</button></div><main class="deck">
+<div class="dial-title"><span>RADIAL MOVE VECTOR</span><b id="vectorMode">DRAG / SWIPE</b></div>
+<div class="dial-wrap"><div class="dial" id="dial" aria-label="Radial movement controller"><span class="ring-label r0">0°</span><span class="ring-label r90">90°</span><span class="ring-label r180">180°</span><span class="ring-label r270">270°</span><div class="vector" id="vector"></div><div class="hub"><strong id="hubAction">MOVE</strong><span>RELEASE</span></div></div></div>
+<div class="readouts"><div class="readout"><b>ANGLE</b><span id="angle">0°</span></div><div class="readout"><b>DISTANCE</b><span id="distance">0px</span></div><div class="readout"><b>VECTOR</b><span id="vectorText">↑</span></div></div>
+<div class="turn-panel"><div class="turn-head"><span>TURN ANGLE</span><span id="turnValue">60°</span></div><div class="angles">${''}<button class="angle" data-deg="30" type="button">30°</button><button class="angle" data-deg="45" type="button">45°</button><button class="angle selected" data-deg="60" type="button">60°</button><button class="angle" data-deg="90" type="button">90°</button></div><div class="turns"><button class="btn" data-action="TURN_L" type="button">↶ TURN L</button><button class="btn" data-action="TURN_R" type="button">TURN R ↷</button></div></div>
+<div class="turns"><button class="btn adjust" id="adjustBtn" data-action="ADJUST" type="button" hidden>⦿ ADJUST</button><button class="btn grab" data-action="GRAB" type="button">GRIP / GRAB</button><button class="btn drop" data-action="DROP" type="button">DROP</button></div><button class="exec" id="exec" type="button">▶ EXECUTE SEQUENCE</button>
+<div class="queue-title"><span>COMMAND BUFFER</span><span id="count">0 / 40</span></div><div class="queue" id="queue"><span>DRAG RADIAL → MOVE // TURN ONLY WHEN SELECTED</span></div><div class="status-line" id="statusLine">LINKING TO ARCADE...</div></main></div><div class="overlay" id="overlay"><div class="modal"><h1 id="overlayTitle">MISSION COMPLETE</h1><p id="overlayText">Round ended. Scan a new QR code when ready.</p></div></div>
+<script src="/socket.io/socket.io.js"></script><script>
+(()=>{'use strict';const $=id=>document.getElementById(id),params=new URLSearchParams(location.search),sessionId=(params.get('session')||'').trim().toUpperCase(),socket=io({query:{session:sessionId}}),queue=[];let gameActive=false,executing=false,turnDegrees=60,dragging=false,lastAngle=0,lastDistance=0;
+function haptic(p=25){if(navigator.vibrate)navigator.vibrate(p)}function setControls(on){document.querySelectorAll('button').forEach(b=>b.disabled=!on)}function clamp(v,a,b){return Math.max(a,Math.min(b,v))}function angleFromPoint(x,y,cx,cy){let d=Math.atan2(x-cx,-(y-cy))*180/Math.PI;return (d+360)%360}function vectorGlyph(a){const dirs=['↑','↗','→','↘','↓','↙','←','↖'];return dirs[Math.round(a/45)%8]}
+function renderQueue(){ $('count').textContent=`${queue.length} / 40`; $('queue').innerHTML=queue.length?queue.map((c,i)=>{let label=c.action==='MOVE'?`MOVE ${c.distance}px @ ${Math.round(c.angle)}°`:c.action==='TURN_L'||c.action==='TURN_R'?`${c.action==='TURN_L'?'↶':'↷'} ${c.degrees}°`:c.action==='GRAB'?'GRIP':c.action==='ADJUST'?'ADJUST':'DROP';return `<button class="chip" type="button" data-remove="${i}" title="Remove command">${i+1}. ${label} ×</button>`}).join(''):'<span>DRAG RADIAL → MOVE // TURN ONLY WHEN SELECTED</span>'}
+$('queue').addEventListener('click',e=>{const b=e.target.closest('[data-remove]');if(!b||executing)return;const i=Number(b.dataset.remove);if(Number.isInteger(i)){queue.splice(i,1);renderQueue();$('statusLine').textContent='COMMAND REMOVED';haptic(15)}});
+function add(c){if(!gameActive||executing||queue.length>=40)return;queue.push(c);renderQueue();haptic();$('statusLine').textContent='COMMAND ADDED'}
+function updateRadial(x,y){const rect=$('dial').getBoundingClientRect(),cx=rect.left+rect.width/2,cy=rect.top+rect.height/2,dx=x-cx,dy=y-cy,r=Math.hypot(dx,dy),max=rect.width*.44;const ratio=clamp(r/max,0,1);lastDistance=Math.round(250*ratio*ratio);lastAngle=Math.round(angleFromPoint(x,y,cx,cy));$('angle').textContent=`${lastAngle}°`;$('distance').textContent=`${lastDistance}px`;$('vectorText').textContent=vectorGlyph(lastAngle);$('vector').style.transform=`translate(-50%,-100%) rotate(${lastAngle}deg)`;$('vector').style.height=`${clamp(r/max*39,0,39)}%`;}
+$('dial').addEventListener('pointerdown',e=>{if(!gameActive||executing)return;dragging=true;$('dial').setPointerCapture?.(e.pointerId);updateRadial(e.clientX,e.clientY);$('statusLine').textContent='SELECTING MOVE VECTOR — NO TURN' });$('dial').addEventListener('pointermove',e=>{if(dragging)updateRadial(e.clientX,e.clientY)});$('dial').addEventListener('pointerup',()=>{if(!dragging)return;dragging=false;if(lastDistance>=1){add({action:'MOVE',distance:lastDistance,angle:lastAngle});$('statusLine').textContent=`MOVE ${lastDistance}px @ ${lastAngle}° — HEADING UNCHANGED`}else{$('statusLine').textContent='MOVE TOO SMALL — DRAG A LITTLE FARTHER'} });$('dial').addEventListener('pointercancel',()=>dragging=false);
+document.querySelectorAll('.angle').forEach(b=>b.addEventListener('click',()=>{turnDegrees=Number(b.dataset.deg);document.querySelectorAll('.angle').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');$('turnValue').textContent=`${turnDegrees}°`;haptic()}));
+document.querySelectorAll('[data-action]').forEach(b=>b.addEventListener('click',()=>{if(!gameActive||executing)return;const a=b.dataset.action;if(a==='TURN_L'||a==='TURN_R')add({action:a,degrees:turnDegrees});else add({action:a});b.classList.add('pressed');setTimeout(()=>b.classList.remove('pressed'),100)}));$('clear').addEventListener('click',()=>{if(executing)return;queue.length=0;renderQueue();$('statusLine').textContent='BUFFER CLEARED';haptic(15)});$('exec').addEventListener('click',()=>{if(!gameActive||executing||!queue.length){if(!queue.length)$('statusLine').textContent='ADD COMMANDS FIRST';return}executing=true;setControls(false);$('statusLine').textContent='EXECUTING...';socket.emit('controller_command',{action:'EXEC',queue: queue}); haptic([35,40,80])});
+function showOverlay(t,p){$('overlayTitle').textContent=t;$('overlayText').textContent=p;$('overlay').classList.add('show')}function updateState(s){if(!s)return;gameActive=s.phase==='PLAYING';$('message').textContent=s.message||'MISSION ACTIVE';const t=Math.max(0,Number(s.timeLeft)||0);$('timer').textContent=`${String(Math.floor(t/60)).padStart(2,'0')}:${String(t%60).padStart(2,'0')}`;const r=s.robot, target=r?.carrying?s.target:s.box;const near=r&&target?Math.hypot(Number(r.x)-Number(target.x),Number(r.y)-Number(target.y))<=0.75:false;const adjust=$('adjustBtn');if(adjust){adjust.hidden=!gameActive||!near;adjust.title=r?.carrying?'Align with drop zone':'Align with pickup object'}setControls(gameActive&&!executing)}
+socket.on('connect',()=>{ $('link').classList.add('online');$('linkText').textContent='CONNECTED';$('statusLine').textContent='WAITING FOR LAPTOP GAME...';socket.emit('register_role',{role:'controller',session:sessionId})});socket.on('player_linked',s=>{gameActive=false;setControls(false);$('statusLine').textContent='PLAYER LINKED — WAIT FOR GO';});socket.on('countdown',d=>{$('statusLine').textContent=d?.value==='GO'?'GO! START MOVING':'STARTING IN '+d.value;});socket.on('game_started',s=>{$('overlay').classList.remove('show');queue.length=0;renderQueue();updateState(s);$('statusLine').textContent='CONTROLLER LINKED — GAME IS ON LAPTOP';haptic([30,30,70])});socket.on('command_ack',c=>{$('statusLine').textContent=`${c.action} READY`});socket.on('command_error',e=>{executing=false;setControls(gameActive);$('statusLine').textContent=e.error||'COMMAND ERROR'});socket.on('execution_result',r=>{executing=false;if(r?.ok){queue.length=0;renderQueue();const failed=r.events?.find(e=>e.success===false||e.message);$('statusLine').textContent=failed?.message||'SEQUENCE COMPLETE';haptic(25)}else{$('statusLine').textContent=r?.error||'SEQUENCE FAILED'}if(r?.state)updateState(r.state)});socket.on('timer_tick',d=>{const t=Math.max(0,Number(d.timeLeft)||0);$('timer').textContent=`${String(Math.floor(t/60)).padStart(2,'0')}:${String(t%60).padStart(2,'0')}`});socket.on('invalid_session',()=>{gameActive=false;setControls(false);showOverlay('INVALID SESSION','Scan the current QR code.')});socket.on('game_full',()=>{gameActive=false;setControls(false);showOverlay('ARCADE BUSY','Wait for the next QR code.')});socket.on('force_disconnect',d=>{gameActive=false;executing=false;setControls(false);showOverlay(d?.reason==='TIME UP'?'TIME UP':'MISSION COMPLETE','Round ended. Scan the next QR code.')});socket.on('connect_error',err=>{ $('link').classList.remove('online');$('linkText').textContent='RETRYING';$('statusLine').textContent='CANNOT REACH LAPTOP — USE SAME WI-FI'; });socket.on('disconnect',()=>{gameActive=false;executing=false;$('link').classList.remove('online');$('linkText').textContent='OFFLINE';$('statusLine').textContent='LAPTOP CONNECTION LOST';setControls(false)});renderQueue();setControls(false)})();
+</script></body></html>

@@ -1,149 +1,318 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IEEE RAS START - Host Screen</title>
-    <style>
-        body {
-            background-color: #000;
-            color: #0f0;
-            font-family: 'Courier New', Courier, monospace;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
-            text-align: center;
-            flex-direction: column;
-        }
-        #qr-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        #game-container {
-            display: none;
-            width: 80%;
-            height: 80%;
-            border: 2px solid #0f0;
-            position: relative;
-        }
-        /* CRT overlay placeholder */
-        .crt::before {
-            content: " ";
-            display: block;
-            position: absolute;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            z-index: 2;
-            background-size: 100% 2px, 3px 100%;
-            pointer-events: none;
-        }
-        h1 {
-            font-size: 3rem;
-            margin-bottom: 10px;
-        }
-        .instruction {
-            font-size: 1.2rem;
-            margin-bottom: 20px;
-        }
-        #command-log {
-            position: absolute;
-            right: 0;
-            top: 0;
-            width: 250px;
-            height: 100%;
-            border-left: 2px solid #0f0;
-            text-align: left;
-            padding: 10px;
-            box-sizing: border-box;
-            overflow-y: auto;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>IEEE RAS // ROBOT RUN</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap');
+:root{--cyan:#00f6ff;--lime:#dfff3f;--orange:#ff9f1c;--red:#ff3864;--bg:#030507;--panel:#081017}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:#d9fbff;font-family:'Share Tech Mono',Consolas,monospace}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:20;background:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 4px);mix-blend-mode:screen}
+body:after{content:"";position:fixed;inset:0;pointer-events:none;z-index:21;box-shadow:inset 0 0 120px #000,inset 0 0 25px rgba(0,246,255,.12)}
+.screen{position:absolute;inset:0;display:none}.screen.active{display:flex}
+.pixel{font-family:'Press Start 2P',Consolas,monospace;text-transform:uppercase}.cyan{color:var(--cyan)}.lime{color:var(--lime)}.orange{color:var(--orange)}
+#idle{align-items:center;justify-content:center;background:radial-gradient(circle at center,#0b2028 0,#030507 55%)}
+.idle-wrap{width:min(1120px,92vw);display:grid;grid-template-columns:1.15fr .85fr;gap:58px;align-items:center}
+.brand{font-size:clamp(20px,3vw,38px);letter-spacing:2px;line-height:1.7}.tag{margin:20px 0;color:#78939a;font-size:18px}.scan{font-size:18px;letter-spacing:5px;margin-top:28px;animation:blink 1.1s steps(2) infinite}
+.robot-logo{font-size:112px;filter:drop-shadow(0 0 18px rgba(0,246,255,.7));margin-bottom:8px}.qr-card{justify-self:center;width:min(400px,40vw)}
+.qr-frame{padding:18px;background:#fff;min-height:330px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 5px #14262d,0 0 50px rgba(0,246,255,.3)}
+#qr{width:min(330px,36vw);height:auto;display:block;image-rendering:auto}.qr-fallback{display:none;text-align:center;color:#14262d;font:14px 'Share Tech Mono',monospace;padding:22px;word-break:break-all}.qr-fallback strong{display:block;font:12px 'Press Start 2P';margin-bottom:14px}
+.session{margin-top:14px;text-align:center;color:#65848c;font-size:13px;letter-spacing:3px}.controller-url{margin-top:7px;text-align:center;color:#456872;font-size:11px;word-break:break-all}.scan-note{text-align:center;margin-top:7px;color:#00f6ff;font:9px "Press Start 2P";letter-spacing:.5px}
+@keyframes blink{50%{opacity:.25}}
+#game{padding:18px;flex-direction:column;gap:12px}
+.topbar{height:78px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;border:1px solid #16353d;background:linear-gradient(90deg,#071116,#09141a);padding:12px 18px;box-shadow:0 0 25px rgba(0,246,255,.06)}
+.logo{font-size:13px;line-height:1.8}.logo span{color:var(--cyan)}.stat{text-align:center}.stat .label{font-size:10px;color:#54727b;letter-spacing:2px}.timer{font:22px 'Press Start 2P';color:var(--lime);margin-top:6px}.status{text-align:right;font-size:12px;color:var(--cyan)}
+.countdown{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,7,10,.72);backdrop-filter:blur(2px);z-index:5}.countdown.show{display:flex}.countdown-box{text-align:center;padding:30px 50px;border:2px solid var(--cyan);background:rgba(4,12,16,.92);box-shadow:0 0 40px rgba(0,246,255,.2)}.countdown-label{font-size:10px;color:#5f828a;letter-spacing:3px;margin-bottom:18px}.countdown-value{font:clamp(42px,9vw,92px) 'Press Start 2P';color:var(--lime);text-shadow:0 0 22px rgba(223,255,63,.45);animation:countPulse .55s ease-out}@keyframes countPulse{from{transform:scale(1.3);opacity:.2}to{transform:scale(1);opacity:1}}
+.dot{display:inline-block;width:8px;height:8px;background:var(--cyan);box-shadow:0 0 10px var(--cyan);margin-right:7px}
+.game-layout{min-height:0;flex:1;display:grid;grid-template-columns:1fr 270px;gap:12px}.board-panel{position:relative;min-width:0;border:1px solid #173a42;background:#04080b;overflow:hidden}#gameCanvas{position:absolute;inset:0;width:100%;height:100%}
+.corner-label{position:absolute;top:12px;left:14px;color:#456872;font-size:11px;letter-spacing:2px}.corner-label.right{left:auto;right:14px}
+.side{border:1px solid #173a42;background:#071017;padding:16px;display:flex;flex-direction:column;gap:12px}.panel-title{font-size:11px;color:#4c727c;letter-spacing:2px}.readout{border:1px solid #15353d;background:#050b0f;padding:12px}.readout b{display:block;color:#6e929b;font-size:10px;margin-bottom:8px}.readout span{color:#dffaff}.queue{flex:1;min-height:120px;border:1px solid #15353d;padding:10px;overflow:auto}.cmd{display:flex;justify-content:space-between;border-bottom:1px solid #10252c;padding:8px 2px;font-size:12px}.cmd:last-child{border:0}.legend{font-size:10px;color:#50717a;line-height:1.8}.bottom{height:34px;display:flex;align-items:center;justify-content:space-between;color:#456872;font-size:10px;letter-spacing:1px}
+#result{align-items:center;justify-content:center;text-align:center;background:radial-gradient(circle,#10252b 0,#030507 65%)}.result-box{border:2px solid var(--cyan);padding:48px 70px;box-shadow:0 0 50px rgba(0,246,255,.15)}.result-title{font-size:clamp(24px,4vw,52px);color:var(--lime);line-height:1.5}.result-score{margin-top:25px;font-size:18px}.result-sub{margin-top:15px;color:#66838b}
+@media(max-width:800px){.idle-wrap{grid-template-columns:1fr;text-align:center;gap:25px}.qr-card{order:-1;width:min(390px,75vw)}.qr-frame{min-height:0}.qr-frame img{width:min(290px,65vw)}.game-layout{grid-template-columns:1fr}.side{display:none}.topbar{grid-template-columns:1fr auto}.status{display:none}}
+</style>
 </head>
-<body class="crt">
-    
-    <div id="qr-container">
-        <h1>IEEE RAS START</h1>
-        <div class="instruction">Scan the QR code to become the controller</div>
-        <img id="qr-image" src="" alt="QR Code" />
+<body>
+<section id="idle" class="screen active">
+  <div class="idle-wrap">
+    <div>
+      <div class="robot-logo">🤖</div>
+      <div class="brand pixel"><span class="cyan">IEEE RAS</span><br>ROBOT RUN<br><span class="orange">8-BIT MISSION</span></div>
+      <div class="tag">PROGRAM THE ROBOT. GRAB THE CORE. ESCAPE THE GRID.</div>
+      <div class="scan pixel cyan">SCAN TO ENTER_</div>
     </div>
-
-    <div id="game-container">
-        <h2>GAME VIEW</h2>
-        <!-- Game Canvas would go here -->
-        
-        <div id="command-log">
-            <h3>CODER / INSTRUCTION</h3>
-            <ul id="log-list"></ul>
-        </div>
-        
-        <button id="dev-gameover" style="position:absolute; bottom:10px; left:10px; background:#f00; color:#fff; border:none; padding:10px; cursor:pointer; z-index: 10;">Simulate Game Over</button>
+    <div class="qr-card">
+      <div class="qr-frame">
+        <img id="qr" alt="Scan this QR code with the phone controller" decoding="async">
+        <div id="qrFallback" class="qr-fallback"><strong>PHONE CONTROLLER LINK</strong><span id="fallbackUrl"></span></div>
+      </div>
+      <div class="session">SESSION // <span id="session">------</span></div>
+      <div id="controllerUrl" class="controller-url">SCAN WITH PHONE — GAME STARTS ON THIS LAPTOP</div><div class="scan-note">PHONE = CONTROLLER &nbsp;•&nbsp; LAPTOP = GAME</div>
     </div>
+  </div>
+</section>
 
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-        const socket = io();
-        socket.emit('register_role', 'host');
+<section id="game" class="screen">
+  <header class="topbar">
+    <div class="logo pixel"><span>IEEE RAS</span><br>ROBOT RUN // MISSION 01</div>
+    <div class="stat"><div class="label">TIME REMAINING</div><div id="timer" class="timer">02:00</div></div>
+    <div class="status"><span class="dot"></span>PLAYER LINKED<br><span id="phase">MISSION ACTIVE</span></div>
+  </header>
+  <div class="game-layout">
+    <div class="board-panel"><canvas id="gameCanvas"></canvas><div id="countdownOverlay" class="countdown"><div class="countdown-box"><div class="countdown-label">PLAYER LINKED // STARTING</div><div id="countdownValue" class="countdown-value">3</div></div></div><div class="corner-label">GRID // 10×10</div><div class="corner-label right">LIVE FEED</div></div>
+    <aside class="side">
+      <div class="panel-title">ROBOT TELEMETRY</div>
+      <div class="readout"><b>POSITION</b><span id="pos">X 00 // Y 00</span></div>
+      <div class="readout"><b>ROTATION</b><span id="heading">0°</span></div>
+      <div class="readout"><b>MOVE VECTOR</b><span id="vectorReadout">NONE</span></div><div class="readout"><b>PAYLOAD</b><span id="payload">EMPTY</span></div>
+      <div class="readout"><b>SCORE</b><span id="score">000000</span></div>
+      <div class="panel-title">COMMAND BUFFER</div>
+      <div id="queue" class="queue"><div class="legend">WAITING FOR PLAYER INPUT...</div></div>
+      <div class="legend">PHONE INPUT → QUEUE → EXEC → ROBOT<br>GRAB CORE → REACH TARGET → DROP</div>
+    </aside>
+  </div>
+  <div class="bottom"><span>LINK: SOCKET.IO // LOW LATENCY</span><span id="message">LOCATE THE CORE</span></div>
+</section>
 
-        const qrContainer = document.getElementById('qr-container');
-        const gameContainer = document.getElementById('game-container');
-        const logList = document.getElementById('log-list');
+<section id="result" class="screen">
+ <div class="result-box"><div id="resultTitle" class="result-title pixel">MISSION COMPLETE</div><div id="resultScore" class="result-score">SCORE 000000</div><div class="result-sub">PREPARING NEXT SESSION...</div></div>
+</section>
 
-        // Fetch the QR code
-        fetch('/api/qr')
-            .then(res => res.json())
-            .then(data => {
-                document.getElementById('qr-image').src = data.qr;
-            });
+<script src="/socket.io/socket.io.js"></script>
+<script src="/GameRenderer.js"></script>
+<script src="/MovementAnimator.js"></script>
+<script>
+(() => {
+  // Browser-side renderer fallback: the host must still draw the game even if
+  // the separate renderer asset is unavailable for any reason.
+  if (!window.GameRenderer) {
+    window.GameRenderer = class GameRenderer {
+      constructor(canvas) {
+        this.canvas = canvas; this.ctx = canvas.getContext('2d'); this.state = null;
+        this.particles = []; this.lastTime = performance.now(); this.resize();
+        window.addEventListener('resize', () => this.resize());
+        requestAnimationFrame(t => this.loop(t));
+      }
+      resize() {
+        const rect = this.canvas.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const w = Math.max(1, Math.floor(rect.width));
+        const h = Math.max(1, Math.floor(rect.height));
+        this.canvas.width = Math.floor(w * dpr); this.canvas.height = Math.floor(h * dpr);
+        this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0); this.width = w; this.height = h;
+      }
+      setState(state) { this.state = state; this.resize(); }
+      animateRobot(snapshot) { if (!this.state) return; this.state.robot = { ...snapshot }; }
+      loop(now) { this.lastTime = now; this.draw(); requestAnimationFrame(t => this.loop(t)); }
+      draw() {
+        const ctx=this.ctx,w=this.width||800,h=this.height||600; ctx.clearRect(0,0,w,h);
+        ctx.fillStyle='#05070b'; ctx.fillRect(0,0,w,h); if(!this.state)return;
+        const n=this.state.gridSize||10, board=Math.min(w*.86,h*.88), ox=(w-board)/2, oy=(h-board)/2, cell=board/n;
+        ctx.strokeStyle='rgba(0,246,255,.35)';ctx.lineWidth=2;ctx.strokeRect(ox,oy,board,board);
+        for(let y=0;y<n;y++)for(let x=0;x<n;x++){ctx.fillStyle=(x+y)%2?'#0b1219':'#0d171f';ctx.fillRect(ox+x*cell,oy+y*cell,cell-1,cell-1);ctx.strokeStyle='rgba(45,115,130,.12)';ctx.strokeRect(ox+x*cell,oy+y*cell,cell,cell);}
+        const target=this.state.target, box=this.state.box, r=this.state.robot;
+        if(target){ctx.strokeStyle='#f4ff4f';ctx.lineWidth=3;ctx.strokeRect(ox+target.x*cell+cell*.2,oy+target.y*cell+cell*.2,cell*.6,cell*.6);}
+        if(box&&!r?.carrying){ctx.fillStyle='#ff9f1c';ctx.fillRect(ox+box.x*cell+cell*.25,oy+box.y*cell+cell*.25,cell*.5,cell*.5);}
+        if(r){const cx=ox+(r.x+.5)*cell,cy=oy+(r.y+.5)*cell,size=cell*.52;const heading={NORTH:0,EAST:Math.PI/2,SOUTH:Math.PI,WEST:-Math.PI/2}[r.direction]||0;ctx.save();ctx.translate(cx,cy);ctx.fillStyle='#b9fbff';ctx.fillRect(-size/2,-size/2,size,size);ctx.fillStyle='#172b35';ctx.fillRect(-size*.4,size*.35,size*.8,size*.13);ctx.fillStyle='#14222b';ctx.fillRect(-size*.32,-size*.25,size*.64,size*.42);ctx.fillStyle='#00f6ff';ctx.fillRect(-size*.2,-size*.12,size*.12,size*.12);ctx.fillRect(size*.08,-size*.12,size*.12,size*.12);ctx.save();ctx.rotate(heading);ctx.fillStyle='#f4ff4f';ctx.fillRect(-size*.09,-size*.66,size*.18,size*.18);ctx.beginPath();ctx.moveTo(0,-size*.82);ctx.lineTo(-size*.14,-size*.61);ctx.lineTo(size*.14,-size*.61);ctx.closePath();ctx.fill();ctx.restore();ctx.restore();if(r.carrying){ctx.fillStyle='#ff9f1c';ctx.fillRect(cx-cell*.16,cy-cell*.78,cell*.32,cell*.32);}}
+      }
+    };
+  }
+  if (!window.MovementAnimator) {
+    window.MovementAnimator = class MovementAnimator {
+      constructor(options={}) { this.stepDuration=options.stepDuration??120; this.onStep=options.onStep??null; this.running=false; this.timer=null; }
+      play(snapshots=[]) { this.stop(); if(!snapshots.length)return Promise.resolve([]); this.running=true; return new Promise(resolve=>{let i=0;const step=()=>{if(!this.running)return resolve([]);this.onStep?.({...snapshots[i++]});if(i>=snapshots.length){this.running=false;this.timer=null;return resolve(snapshots.map(s=>({...s})));}this.timer=setTimeout(step,this.stepDuration)};step()}); }
+      stop(){if(this.timer)clearTimeout(this.timer);this.timer=null;this.running=false;}
+    };
+  }
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const socket = io();
+  let state = null;
+  let renderer = null;
+  let animator = null;
+  let executionBusy = false;
 
-        // Player connected
-        socket.on('player_connected', () => {
-            qrContainer.style.display = 'none';
-            gameContainer.style.display = 'block';
-            addLog('Player Connected. Game Started.');
-        });
+  function formatTime(seconds) {
+    const safe = Math.max(0, Number(seconds) || 0);
+    return `${String(Math.floor(safe / 60)).padStart(2,'0')}:${String(safe % 60).padStart(2,'0')}`;
+  }
 
-        // Player disconnected or game reset
-        socket.on('player_disconnected', () => {
-            addLog('Player Disconnected.');
-            resetToQR();
-        });
-        
-        socket.on('reset_to_qr', () => {
-            resetToQR();
-        });
+  function show(id) {
+    document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+    $(id).classList.add('active');
+    // The canvas is hidden on the QR screen. Resize it after the game screen
+    // becomes visible so its drawing buffer matches the actual board size.
+    if (id === 'game' && renderer) {
+      requestAnimationFrame(() => renderer.resize());
+    }
+  }
 
-        // Handle commands from the mobile controller
-        socket.on('game_command', (cmd) => {
-            addLog(`Command: ${cmd.action} ${cmd.val || ''}`);
-        });
+  function renderTelemetry(robot) {
+    if (!robot) return;
+    $('pos').textContent = `X ${String(robot.x).padStart(2,'0')} // Y ${String(robot.y).padStart(2,'0')}`;
+    $('heading').textContent = `${Math.round(robot.rotation ?? 0)}°`;
+    const v = state?.lastVector;
+    $('vectorReadout').textContent = v ? `${Math.round(v.distancePx)}px @ ${Math.round(v.angleDeg)}°` : 'NONE';
+    $('payload').textContent = robot.carrying ? 'CORE ACQUIRED' : 'EMPTY';
+  }
 
-        function addLog(msg) {
-            const li = document.createElement('li');
-            li.textContent = msg;
-            logList.appendChild(li);
-            if(logList.childElementCount > 15) {
-                logList.removeChild(logList.firstChild);
-            }
-        }
+  function render(s) {
+    if (!s) return;
+    state = JSON.parse(JSON.stringify(s));
+    if (renderer) { renderer.setState(state); if (renderer.setMovementVector) renderer.setMovementVector(state.lastVector); }
+    $('timer').textContent = formatTime(state.timeLeft);
+    $('score').textContent = String(state.score || 0).padStart(6,'0');
+    $('message').textContent = state.message || 'MISSION ACTIVE';
+    $('phase').textContent = state.phase || 'IDLE';
+    renderTelemetry(state.robot);
+  }
 
-        function resetToQR() {
-            qrContainer.style.display = 'flex';
-            gameContainer.style.display = 'none';
-            logList.innerHTML = '';
-        }
+  function renderQueue(events) {
+    const queue = $('queue');
+    if (!events?.length) {
+      queue.innerHTML = '<div class="legend">BUFFER CLEAR</div>';
+      return;
+    }
+    queue.innerHTML = events.map((event, i) => {
+      const label = event.action || event.type || 'CMD';
+      const detail = event.blocked ? 'BLOCKED' : event.success === false ? 'MISS' : 'OK';
+      return `<div class="cmd"><span>${i + 1}. ${label}</span><span>${detail}</span></div>`;
+    }).join('');
+  }
 
-        // For development/testing
-        document.getElementById('dev-gameover').addEventListener('click', () => {
-            addLog('Triggering Game Over...');
-            socket.emit('game_over');
-        });
-    </script>
+  async function loadSession() {
+    try {
+      const sessionResponse = await fetch('/api/session', { cache: 'no-store' });
+      if (!sessionResponse.ok) throw new Error('Session endpoint unavailable');
+      const sessionData = await sessionResponse.json();
+      $('session').textContent = sessionData.session || '------';
+      $('controllerUrl').textContent = sessionData.url || 'Controller URL unavailable';
+      $('fallbackUrl').textContent = sessionData.url || '';
+
+      try {
+        const qrResponse = await fetch('/api/qr', { cache: 'no-store' });
+        const qrData = await qrResponse.json();
+        if (!qrResponse.ok || !qrData.qr) throw new Error(qrData.error || 'QR unavailable');
+        $('qr').src = qrData.qr;
+        $('qr').style.display = 'block';
+        $('qrFallback').style.display = 'none';
+      } catch (qrError) {
+        console.error(qrError);
+        $('qr').style.display = 'none';
+        $('qrFallback').style.display = 'block';
+      }
+    } catch (error) {
+      console.error(error);
+      $('session').textContent = 'OFFLINE';
+      $('controllerUrl').textContent = 'Restart the server and refresh this page.';
+      $('qr').style.display = 'none';
+      $('qrFallback').style.display = 'block';
+      $('fallbackUrl').textContent = 'SERVER CONNECTION ERROR';
+    }
+  }
+
+  function init() {
+    renderer = new GameRenderer($('gameCanvas'));
+    const boardPanel = document.querySelector('.board-panel');
+    if (window.ResizeObserver && boardPanel) {
+      const observer = new ResizeObserver(() => renderer && renderer.resize());
+      observer.observe(boardPanel);
+    }
+    animator = new MovementAnimator({
+      stepDuration: 130,
+      onStep(snapshot) {
+        if (!state) return;
+        state.robot = { ...snapshot };
+        if (renderer) renderer.animateRobot(snapshot);
+        renderTelemetry(snapshot);
+      }
+    });
+  }
+
+  socket.on('connect', () => {
+    socket.emit('register_role', 'host');
+  });
+
+  socket.on('session_info', data => {
+    if (data?.session) $('session').textContent = data.session;
+    if (data?.url) {
+      $('controllerUrl').textContent = data.url;
+      $('fallbackUrl').textContent = data.url;
+    }
+    loadSession();
+  });
+
+  socket.on('game_state', render);
+  socket.on('player_connected', s => { render(s); show('game'); $('countdownOverlay').classList.add('show'); $('countdownValue').textContent = '3'; });
+  socket.on('countdown', data => {
+    show('game');
+    const overlay = $('countdownOverlay');
+    overlay.classList.add('show');
+    const value = data?.value ?? '';
+    $('countdownValue').textContent = value;
+    $('countdownValue').style.animation = 'none';
+    void $('countdownValue').offsetWidth;
+    $('countdownValue').style.animation = 'countPulse .55s ease-out';
+    if (value === 'GO') setTimeout(() => overlay.classList.remove('show'), 650);
+  });
+  socket.on('player_disconnected', () => { executionBusy = false; $('countdownOverlay').classList.remove('show'); show('idle'); loadSession(); });
+  socket.on('timer_tick', data => {
+    if (state) {
+      state.timeLeft = Math.max(0, Number(data.timeLeft) || 0);
+      $('timer').textContent = formatTime(state.timeLeft);
+    }
+  });
+
+  socket.on('game_execution', async result => {
+    executionBusy = true;
+    renderQueue(result.events || []);
+    render(result.startState || state);
+
+    for (const event of result.events || []) {
+      if (event.type === 'MOVE' && event.snapshots?.length) {
+        state.lastVector = { angleDeg: event.angleDeg, distancePx: event.distancePx, ...(event.vector || {}) };
+        renderer.setMovementVector?.(state.lastVector);
+        await animator.play(event.snapshots);
+      } else if (event.type === 'TURN' && event.state) {
+        state.robot = { ...event.state };
+        state.lastVector = null;
+        renderer.setState(state);
+        renderer.setMovementVector?.(null);
+        renderTelemetry(state.robot);
+      } else if ((event.type === 'GRAB' || event.type === 'DROP' || event.type === 'INFO') && event.state) {
+        state.robot = { ...event.state };
+        renderer.setState(state);
+        renderer.setMovementVector?.(state.lastVector);
+        renderTelemetry(state.robot);
+      }
+      if (event.success === false || event.message) {
+        $('message').textContent = event.message || 'COMMAND REJECTED';
+      }
+    }
+
+    render(result.state);
+    executionBusy = false;
+  });
+
+  socket.on('game_over', data => {
+    executionBusy = false;
+    render(data.state);
+    $('resultTitle').textContent = data.reason === 'TIME UP' ? 'TIME UP' : 'MISSION COMPLETE';
+    $('resultScore').textContent = `SCORE ${String(data.state?.score || 0).padStart(6,'0')}`;
+    show('result');
+  });
+
+  socket.on('reset_to_qr', () => {
+    executionBusy = false;
+    $('countdownOverlay').classList.remove('show');
+    show('idle');
+    $('queue').innerHTML = '<div class="legend">WAITING FOR PLAYER INPUT...</div>';
+    loadSession();
+  });
+
+  init();
+  loadSession();
+})();
+</script>
 </body>
 </html>
