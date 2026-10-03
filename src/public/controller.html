@@ -5,50 +5,199 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>IEEE RAS // JOYSTICK CONTROLLER</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
-:root{--void:#090909;--white:#f7f9fa;--soft:#f0f0f0;--steel:#828384;--graphite:#474747;--iron:#423738;--ash:#6b6b6b;--violet:#af50ff;--line:rgba(247,249,250,.16);--mono:'DM Mono',ui-monospace,monospace;--sans:'DM Sans',system-ui,sans-serif}
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap');
+
+:root{--cyan:#00f6ff;--lime:#dfff3f;--orange:#ff9f1c;--red:#ff3864}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;min-height:100%;background:var(--void);color:var(--white);font-family:var(--sans);touch-action:manipulation}
-body{min-height:100vh}
-.app{width:min(100%,560px);min-height:100vh;margin:0 auto;padding:18px 20px max(20px,env(safe-area-inset-bottom));display:flex;flex-direction:column}
-header{display:flex;justify-content:space-between;align-items:center;padding:14px 0 17px;border-bottom:1px solid var(--line)}
-.brand{font:500 12px/1.7 var(--mono);letter-spacing:.14em;color:var(--soft)}.brand span{color:var(--white)}
-.link{font:10px var(--mono);letter-spacing:.12em;color:var(--steel);text-align:right}.link i{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--steel);margin:0 7px 1px 0}.link.online i{background:var(--violet)}
-.timer{font:500 18px var(--mono);color:var(--white);text-align:right;margin-top:7px;letter-spacing:.04em}
-.mission{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 0 18px;font:10px var(--mono);letter-spacing:.1em;color:var(--steel)}.mission #message{color:var(--soft)}
-.clear{border:1px solid var(--line);border-radius:6px;background:transparent;color:var(--steel);font:10px var(--mono);letter-spacing:.08em;padding:8px 11px}
-.deck{display:flex;flex-direction:column;gap:0}.control-title{display:flex;justify-content:space-between;color:var(--soft);font:11px var(--mono);letter-spacing:.18em;margin:7px 0 15px}
-.control-panel{width:100%;margin:0 0 14px}.control-section{padding:15px 0;border-top:1px solid var(--line);margin:0}.section-label{font:10px var(--mono);letter-spacing:.18em;color:var(--steel);margin-bottom:12px}
-.angle-grid,.forward-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.angle-option,.forward-option{min-height:46px;border:1px solid var(--line);border-radius:6px;background:transparent;color:var(--soft);font:12px var(--mono);touch-action:manipulation;transition:background .15s,border-color .15s,color .15s}
-.angle-option.selected,.forward-option.selected{border-color:var(--violet);background:var(--violet);color:#fff}
-.selected-info{margin-top:10px;color:var(--steel);font:10px var(--mono);letter-spacing:.06em;text-align:right}.selected-info strong{color:var(--white);font-weight:500}
-.range-note{margin-top:10px;color:var(--ash);font:9px var(--mono);letter-spacing:.09em;text-align:left}
-.add-move{width:100%;min-height:50px;border:1px solid var(--violet);border-radius:8px;background:var(--violet);color:#fff;font:500 11px var(--mono);letter-spacing:.12em;touch-action:manipulation}.add-move:active{opacity:.82;transform:translateY(1px)}
-.readouts{display:grid;grid-template-columns:1fr 1fr;gap:0;margin:0 0 14px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.readout{padding:13px 10px 13px 0;text-align:left}.readout+ .readout{padding-left:15px;border-left:1px solid var(--line)}.readout b{display:block;color:var(--steel);font:9px var(--mono);letter-spacing:.16em;margin-bottom:7px}.readout span{color:var(--white);font:13px var(--mono)}
-.turns{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:0}.btn{min-height:50px;border:1px solid var(--line);border-radius:8px;background:transparent;color:var(--soft);font:10px var(--mono);letter-spacing:.08em}.btn:active,.btn.pressed{border-color:var(--white);background:rgba(247,249,250,.08)}.grab{color:var(--soft)}.drop{color:var(--soft)}
-.exec{width:100%;min-height:54px;margin-top:10px;border:1px solid var(--white);border-radius:8px;color:var(--white);font:500 11px var(--mono);letter-spacing:.12em;background:transparent}.exec:active{background:rgba(247,249,250,.1)}
-.queue-title{display:flex;justify-content:space-between;margin-top:20px;padding-top:13px;border-top:1px solid var(--line);color:var(--steel);font:10px var(--mono);letter-spacing:.13em}.queue{min-height:54px;max-height:108px;margin-top:9px;display:flex;gap:7px;overflow:auto;padding:8px 0;border-bottom:1px solid var(--line);background:transparent}.queue>span{color:var(--ash);font:10px var(--mono);letter-spacing:.03em;padding:10px 0}.chip{flex:0 0 auto;padding:9px 10px;border:1px solid var(--line);border-radius:6px;color:var(--soft);font:10px var(--mono);background:transparent}.status-line{margin-top:11px;text-align:left;color:var(--steel);font:10px var(--mono);letter-spacing:.08em;min-height:14px}
-.overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;text-align:left;background:rgba(9,9,9,.96);z-index:30;padding:24px}.overlay.show{display:flex}.modal{width:min(100%,390px);border:1px solid var(--line);border-radius:19px;padding:30px 24px;background:#111}.modal h1{font:italic 500 32px/1.1 'Playfair Display',Georgia,serif;color:var(--white)}.modal p{color:var(--steel);font:14px/1.6 var(--sans)}
-button{cursor:pointer}button:disabled{opacity:.42;cursor:default}
-@media(max-width:360px){.app{padding-left:15px;padding-right:15px}.angle-grid,.forward-grid{gap:6px}.angle-option,.forward-option{min-height:42px;font-size:11px}}
-</style>
-<style>
-:root{--void:#050510;--panel:#09091c;--white:#fff7d6;--muted:#aaa5c5;--yellow:#ffe500;--cyan:#31e8ff;--pink:#ff4aa2;--red:#ff4a55;--line:#4542a2;--mono:'VT323',Consolas,monospace;--pixel:'Press Start 2P',monospace}
-html,body{background-color:var(--void);background-image:radial-gradient(rgba(49,232,255,.12) 1px,transparent 1px);background-size:18px 18px;color:var(--white);font-family:var(--mono)}
-.app{width:min(100%,560px);padding:14px 18px max(18px,env(safe-area-inset-bottom));background:rgba(5,5,16,.96);border-left:2px solid var(--line);border-right:2px solid var(--line);box-shadow:0 0 0 5px #08081a}
-header{padding:13px 12px;border:2px solid var(--cyan);background:var(--panel);box-shadow:inset 0 0 0 3px #09091c,0 0 14px rgba(49,232,255,.13)}
-.brand{font:9px/1.8 var(--pixel);color:var(--white)}.brand span{color:var(--yellow)}.link{font:16px var(--mono);color:var(--muted)}.link i{width:8px;height:8px}.link.online i{background:#44ff80;box-shadow:0 0 9px #44ff80}.timer{font:16px var(--pixel);color:var(--yellow);text-shadow:0 0 8px rgba(255,229,0,.35)}
-.mission{font:17px var(--mono);color:var(--cyan);text-transform:uppercase}.mission #message{color:var(--yellow)}.clear{border:1px solid var(--pink);background:#160b20;color:var(--pink);font:9px var(--pixel);padding:9px}
-.control-title{color:var(--yellow);font:9px/1.8 var(--pixel);text-shadow:0 0 10px rgba(255,229,0,.22)}.control-panel{padding:0 10px;border:2px dashed var(--line);background:rgba(9,9,28,.9)}.control-section{padding:13px 0;border-bottom:1px dashed #38356e}.section-label{font:9px var(--pixel);color:var(--cyan)}
-.angle-grid,.forward-grid{gap:7px}.angle-option,.forward-option{min-height:43px;border:2px solid #38356e;background:#0c0c22;color:var(--white);font:18px var(--mono);box-shadow:inset 0 -3px #050510}.angle-option.selected,.forward-option.selected{border-color:var(--yellow);background:#24200a;color:var(--yellow);box-shadow:0 0 10px rgba(255,229,0,.22),inset 0 -3px #6f6100}
-.selected-info{color:var(--muted);font:15px var(--mono)}.selected-info strong{color:var(--yellow)}.range-note{color:var(--muted);font:14px var(--mono)}
-.add-move{min-height:50px;border:2px solid var(--yellow);background:var(--yellow);color:#171300;font:9px var(--pixel);box-shadow:0 4px #9b8500,0 0 14px rgba(255,229,0,.18)}
-.readouts{gap:8px}.readout{padding:10px;border:1px solid var(--line);background:var(--panel)}.readout b{color:var(--cyan);font:8px var(--pixel)}.readout span{color:var(--yellow);font:20px var(--mono)}
-.turns{gap:8px}.btn{min-height:48px;border:2px solid var(--pink);background:#170b20;color:#ff9bc9;font:9px/1.6 var(--pixel)}.btn.drop{border-color:var(--cyan);background:#071720;color:var(--cyan)}.exec{min-height:56px;border:2px solid var(--red);background:#260b15;color:#ff7d84;font:9px/1.8 var(--pixel);box-shadow:0 0 13px rgba(255,74,85,.15)}
-.queue-title{border-bottom:1px dashed var(--line);color:var(--cyan);font:8px/1.6 var(--pixel)}.queue{background:var(--panel)}.queue>span{color:var(--muted);font:17px var(--mono)}.chip{border:1px solid var(--cyan);background:#071720;color:var(--cyan);font:16px var(--mono)}.status-line{color:var(--yellow);font:16px var(--mono);text-transform:uppercase}
-.overlay{background:rgba(4,4,16,.96)}.modal{border:3px solid var(--yellow);background:#0b0b20;box-shadow:0 0 0 5px #10102b,0 0 28px rgba(255,229,0,.2)}.modal h1{font:13px/1.8 var(--pixel);color:var(--yellow)}.modal p{color:var(--white);font:21px/1.35 var(--mono)}button:disabled{opacity:.4}
-@media(max-width:360px){.angle-option,.forward-option{min-height:39px}.brand{font-size:8px}.control-title,.section-label,.readout b,.exec,.add-move,.btn,.queue-title{font-size:8px}}
+html,body{margin:0;min-height:100%;background:radial-gradient(circle at 50% 20%,#10232a,#030609 65%);color:#dffaff;font-family:'Share Tech Mono',Consolas,monospace;touch-action:manipulation}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 4px);z-index:10}
+.app{min-height:100vh;display:flex;flex-direction:column;padding:14px max(14px,env(safe-area-inset-left)) max(12px,env(safe-area-inset-bottom));max-width:560px;margin:auto}
+header{display:flex;justify-content:space-between;align-items:center;border:1px solid #173943;background:#071117;padding:12px 13px}
+.brand{font:10px/1.7 'Press Start 2P'}.brand span{color:var(--cyan)}
+.link{font-size:11px;color:#6f929b}.link i{display:inline-block;width:7px;height:7px;border-radius:50%;background:#56666b;margin-right:5px}
+.link.online i{background:var(--cyan);box-shadow:0 0 9px var(--cyan)}
+.timer{font:11px 'Press Start 2P';color:var(--lime);margin-top:4px}
+.mission{padding:10px 2px 4px;font-size:11px;color:#577780;display:flex;justify-content:space-between}
+.mission #message{color:var(--cyan)}
+.clear{border:0;background:none;color:#52747d;font:10px 'Share Tech Mono';padding:5px}
+.deck{
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-start;
+    gap:0;
+    padding-top:4px;
+}
+
+.control-title{display:flex;justify-content:space-between;color:#6c9098;font-size:10px;margin:8px 0}
+.control-title b{color:var(--cyan)}
+
+.dpad-wrap{display:flex;justify-content:center;margin:2px 0 8px}
+.dpad{
+    width:min(78vw,310px);
+    height:min(78vw,310px);
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    grid-template-rows:1fr 1fr 1fr;
+    gap:8px;
+    padding:18px;
+    border:2px solid #20505a;
+    border-radius:28px;
+    background:radial-gradient(circle,#11262d 0,#071116 62%,#030608 100%);
+    box-shadow:inset 0 0 35px rgba(0,246,255,.09),0 0 35px rgba(0,246,255,.08);
+    user-select:none;
+}
+.dpad-btn{
+    border:1px solid #214852;
+    border-radius:14px;
+    background:linear-gradient(#0b1b21,#061014);
+    color:#dffaff;
+    font:18px 'Press Start 2P';
+    min-width:0;
+    touch-action:manipulation;
+    user-select:none;
+    -webkit-user-select:none;
+}
+.dpad-btn:active,.dpad-btn.pressed{
+    transform:translateY(2px) scale(.98);
+    border-color:var(--cyan);
+    background:#102c35;
+    box-shadow:0 0 16px rgba(0,246,255,.18);
+}
+.dpad-btn.up{grid-column:2;grid-row:1}
+.dpad-btn.left{grid-column:1;grid-row:2}
+.dpad-btn.center{grid-column:2;grid-row:2;border-radius:50%;font-size:10px;color:#52747d;border-color:#173943;background:#071117}
+.dpad-btn.right{grid-column:3;grid-row:2}
+.dpad-btn.down{grid-column:2;grid-row:3}
+
+.readouts{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:0 0 8px}
+.readout{border:1px solid #173943;background:#050c10;padding:9px;text-align:center}
+.readout b{display:block;color:#4f747d;font-size:9px;margin-bottom:5px}
+.readout span{color:#dffaff;font-size:12px}
+
+
+
+
+
+
+.turns{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:0}
+.btn{min-height:54px;border:1px solid #214852;background:linear-gradient(#0b1b21,#061014);color:#dffaff;font:10px 'Press Start 2P'}
+.btn:active,.btn.pressed{transform:translateY(2px);border-color:var(--cyan);background:#102c35}
+.grab{color:var(--orange)}.drop{color:var(--lime)}
+.adjust{color:var(--cyan);border-color:var(--cyan);display:block}
+.adjust[hidden]{display:none}
+.exec{width:100%;min-height:58px;margin-top:8px;border:2px solid var(--cyan);color:var(--cyan);font:11px 'Press Start 2P';background:#061014}
+.queue-title{display:flex;justify-content:space-between;margin-top:8px;color:#52747d;font-size:10px}
+.queue{height:55px;margin-top:5px;display:flex;gap:6px;overflow:auto;padding:6px;border:1px solid #15363e;background:#050c10}
+.chip{flex:0 0 auto;padding:8px;border:1px solid #24515a;color:#b9edf1;font-size:9px;background:#0a171d}
+.status-line{margin-top:7px;text-align:center;color:#4d7079;font-size:10px;min-height:14px}
+.overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;text-align:center;background:rgba(1,4,6,.97);z-index:30;padding:30px}
+.overlay.show{display:flex}
+.modal{border:1px solid var(--cyan);padding:35px 22px;max-width:390px}
+.modal h1{font:20px 'Press Start 2P';color:var(--lime);line-height:1.7}
+.modal p{color:#719099;line-height:1.6}
+
+@media(max-width:360px){
+    .dpad{padding:12px;gap:6px}
+    .dpad-btn{font-size:15px}
+}
+
+
+/* Compact vertical phone layout */
+.app{
+    width:100%;
+    max-width:560px;
+    min-height:100vh;
+}
+.deck{
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-start;
+}
+.dpad{
+    width:min(72vw,290px);
+    height:min(72vw,290px);
+    padding:15px;
+    gap:7px;
+}
+.control-title{margin:5px 0 3px}
+.dpad-wrap{margin:2px 0 8px}
+.readouts{margin-bottom:8px}
+
+/* Angle + forward controls */
+.control-panel{
+    width:100%;
+    margin:2px 0 8px;
+}
+.control-section{
+    border:1px solid #173943;
+    background:#050c10;
+    padding:8px;
+    margin-bottom:7px;
+}
+.section-label{
+    color:#6b8e97;
+    font-size:9px;
+    margin-bottom:7px;
+    letter-spacing:1px;
+}
+.angle-layout{display:grid;grid-template-columns:minmax(0,1fr) 96px;align-items:center;gap:8px}
+.angle-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+.compass{width:96px;height:96px;display:block;overflow:visible}
+.compass-ring{fill:#071117;stroke:#214852;stroke-width:1.5}
+.compass-tick{stroke:#52747d;stroke-width:1.5}
+.compass-cardinal{fill:#7eabb4;font:7px 'Share Tech Mono',monospace;text-anchor:middle}
+.compass-cardinal.north{fill:var(--lime)}
+.compass-needle{transform-origin:50px 50px;transition:transform .2s ease;filter:drop-shadow(0 0 3px rgba(0,246,255,.6))}
+.compass-needle .needle{fill:var(--cyan)}.compass-needle .tail{fill:#36535a}.compass-center{fill:var(--lime)}
+@media(max-width:360px){.angle-layout{grid-template-columns:minmax(0,1fr) 82px;gap:5px}.compass{width:82px;height:82px}}
+.angle-option,
+.forward-option{
+    min-height:40px;
+    border:1px solid #214852;
+    background:#071117;
+    color:#d7f4f7;
+    font:11px 'Press Start 2P';
+    touch-action:manipulation;
+}
+.angle-option.selected,
+.forward-option.selected{
+    border-color:var(--lime);
+    color:var(--lime);
+    box-shadow:0 0 12px rgba(223,255,63,.10);
+}
+.selected-info{
+    margin-top:7px;
+    color:#52747d;
+    font-size:8px;
+    text-align:right;
+}
+.selected-info strong{
+    color:#dffaff;
+}
+.forward-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:5px;
+}
+.range-note{
+    margin-top:7px;
+    color:#52747d;
+    font-size:7px;
+    text-align:center;
+}
+.add-move{
+    width:100%;
+    min-height:48px;
+    border:1px solid var(--cyan);
+    background:#061217;
+    color:var(--cyan);
+    font:10px 'Press Start 2P';
+    touch-action:manipulation;
+}
+.add-move:active{
+    transform:translateY(1px);
+    background:#0a2026;
+}
 </style>
 </head>
 <body>
@@ -74,17 +223,22 @@ header{padding:13px 12px;border:2px solid var(--cyan);background:var(--panel);bo
     <div class="control-panel">
     <div class="control-section">
         <div class="section-label">ANGLE</div>
-        <div class="angle-grid" id="angleGrid">
-            <button class="angle-option selected" data-angle="0">0°</button>
-            <button class="angle-option" data-angle="45">45°</button>
-            <button class="angle-option" data-angle="90">90°</button>
-            <button class="angle-option" data-angle="135">135°</button>
-            <button class="angle-option" data-angle="180">180°</button>
-            <button class="angle-option" data-angle="225">225°</button>
-            <button class="angle-option" data-angle="270">270°</button>
-            <button class="angle-option" data-angle="315">315°</button>
+        <div class="angle-layout">
+            <div class="angle-grid" id="angleGrid">
+                <button class="angle-option selected" data-angle="0">0°</button><button class="angle-option" data-angle="45">45°</button>
+                <button class="angle-option" data-angle="90">90°</button><button class="angle-option" data-angle="135">135°</button>
+                <button class="angle-option" data-angle="180">180°</button><button class="angle-option" data-angle="225">225°</button>
+                <button class="angle-option" data-angle="270">270°</button><button class="angle-option" data-angle="315">315°</button>
+            </div>
+            <svg class="compass" viewBox="0 0 100 100" role="img" aria-label="Compass showing selected angle clockwise from north">
+                <circle class="compass-ring" cx="50" cy="50" r="43" /><path class="compass-tick" d="M50 9v7 M91 50h-7 M50 91v-7 M9 50h7" />
+                <text class="compass-cardinal north" x="50" y="6">N</text><text class="compass-cardinal" x="96" y="53">E</text>
+                <text class="compass-cardinal" x="50" y="99">S</text><text class="compass-cardinal" x="4" y="53">W</text>
+                <g class="compass-needle" id="compassNeedle"><path class="needle" d="M50 18 44 51 50 46 56 51Z" /><path class="tail" d="M50 82 44 49 50 54 56 49Z" /></g>
+                <circle class="compass-center" cx="50" cy="50" r="2.5" />
+            </svg>
         </div>
-        <div class="selected-info">SELECTED ANGLE: <strong id="selectedAngle">0°</strong></div>
+        <div class="selected-info">SELECTED ANGLE: <strong id="selectedAngle">0°</strong> · CLOCKWISE FROM NORTH</div>
     </div>
 
     <div class="control-section">
@@ -222,6 +376,7 @@ document.querySelectorAll('.angle-option').forEach(button => {
 
         selectedAngle = Number(button.dataset.angle);
         $('selectedAngle').textContent = `${selectedAngle}°`;
+        $('compassNeedle').style.transform = `rotate(${selectedAngle}deg)`;
         haptic(10);
     });
 });
