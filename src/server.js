@@ -5,6 +5,8 @@ const os = require('os');
 const path = require('path');
 const { Server } = require('socket.io');
 const qrcode = require('qrcode');
+const qrcodeTerminal = require('qrcode-terminal');
+const ngrok = require('@ngrok/ngrok');
 
 const { GameManager } = require('./logic/GameManager');
 const { CommandInterpreter } = require('./interpreter/CommandInterpreter');
@@ -15,6 +17,10 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 const PORT = Number(process.env.PORT || 3000);
+
+// Tell ngrok to skip its browser interstitial page for all responses.
+// This means players scanning the QR go straight to the controller — no click-through.
+app.use((req, res, next) => { res.setHeader('ngrok-skip-browser-warning', '1'); next(); });
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.get('/canvas/GameRenderer.js', (req, res) => {
@@ -80,10 +86,6 @@ const interpreter = new CommandInterpreter();
 let lanIP = '127.0.0.1';
 let finishing = false;
 let countdownToken = 0;
-
-function controllerUrl() {
-    return `http://${lanIP}:${PORT}/controller?session=${encodeURIComponent(session.id)}`;
-}
 
 app.get('/api/health', (req, res) => {
     res.json({ ok: true, session: session.id, controllerConnected: session.hasController() });
@@ -231,14 +233,65 @@ setInterval(() => {
     }
 }, 1000);
 
+// Holds the public base URL once the tunnel is ready (falls back to LAN).
+let publicBaseUrl = null;
+
+function controllerUrl() {
+    const base = publicBaseUrl || `http://${lanIP}:${PORT}`;
+    const url = `${base}/controller?session=${encodeURIComponent(session.id)}`;
+    // ngrok reads this query param from the request and skips its interstitial page.
+    return publicBaseUrl ? `${url}&ngrok-skip-browser-warning=1` : url;
+}
+
 (async () => {
     const routeIP = await detectDefaultRouteIP();
     lanIP = chooseLANAddress(routeIP);
-    server.listen(PORT, '0.0.0.0', () => {
-        console.log(`IEEE RAS Robot Run: http://localhost:${PORT}`);
-        console.log(`Controller: ${controllerUrl()}`);
-        const all = listIPv4Addresses().map(x => `${x.name}: ${x.address}`);
-        if (all.length) console.log(`Network interfaces:\n  ${all.join('\n  ')}`);
-        if (lanIP === '127.0.0.1') console.log('WARNING: No LAN IPv4 address was detected. Phone connection will require the laptop IP to be entered manually.');
-    });
+
+    await new Promise(resolve => server.listen(PORT, '0.0.0.0', resolve));
+    console.log(`\n🎮  IEEE RAS Robot Run`);
+    console.log(`    Local: http://localhost:${PORT}`);
+
+    const all = listIPv4Addresses().map(x => `  ${x.name}: ${x.address}`);
+    if (all.length) console.log(`    LAN interfaces:\n${all.join('\n')}`);
+
+    // ── Open public tunnel (ngrok) ───────────────────────────────────────────
+    console.log('\n⏳  Opening public tunnel (ngrok)…');
+    try {
+        const listener = await ngrok.forward({
+            addr: PORT,
+            authtoken: process.env.NGROK_AUTHTOKEN,  // set in your shell or .env
+            authtoken_from_env: true,
+        });
+        publicBaseUrl = listener.url();
+
+        const url = controllerUrl();
+        console.log(`\n✅  Tunnel ready: ${publicBaseUrl}`);
+        console.log(`\n📱  Scan this QR code to open the controller (works on ANY network):\n`);
+        qrcodeTerminal.generate(url, { small: true }, qrText => {
+            console.log(qrText);
+            console.log(`    ${url}\n`);
+        });
+
+        // Also keep the LAN fallback visible
+        const lanUrl = `http://${lanIP}:${PORT}/controller?session=${encodeURIComponent(session.id)}`;
+        console.log(`🔗  Same-network fallback: ${lanUrl}\n`);
+
+        // Push the public URL to the host browser so its QR updates immediately.
+        sockets.emitHost('tunnel_ready', { url, publicBaseUrl });
+
+    } catch (err) {
+        console.error(`\n❌  Could not open ngrok tunnel: ${err.message}`);
+        if (err.message?.includes('authtoken') || err.message?.includes('auth')) {
+            console.error('    → Set your ngrok auth token: $env:NGROK_AUTHTOKEN="<your_token>"');
+            console.error('    → Get a free token at https://dashboard.ngrok.com/get-started/your-authtoken');
+        }
+        console.log('    Falling back to LAN-only mode.');
+        const lanUrl = controllerUrl();
+        console.log(`\n📱  LAN QR code (same Wi-Fi only):\n`);
+        qrcodeTerminal.generate(lanUrl, { small: true }, qrText => {
+            console.log(qrText);
+            console.log(`    ${lanUrl}\n`);
+        });
+    }
 })();
+

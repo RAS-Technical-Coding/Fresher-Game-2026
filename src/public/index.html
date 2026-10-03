@@ -18,6 +18,7 @@ body:after{content:"";position:fixed;inset:0;pointer-events:none;z-index:21;box-
 .robot-logo{font-size:112px;filter:drop-shadow(0 0 18px rgba(0,246,255,.7));margin-bottom:8px}.qr-card{justify-self:center;width:min(400px,40vw)}
 .qr-frame{padding:18px;background:#fff;min-height:330px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 5px #14262d,0 0 50px rgba(0,246,255,.3)}
 #qr{width:min(330px,36vw);height:auto;display:block;image-rendering:auto}.qr-fallback{display:none;text-align:center;color:#14262d;font:14px 'Share Tech Mono',monospace;padding:22px;word-break:break-all}.qr-fallback strong{display:block;font:12px 'Press Start 2P';margin-bottom:14px}
+.qr-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#456872;font-size:11px;letter-spacing:2px;padding:20px}.qr-loading::before{content:'';width:38px;height:38px;border:3px solid #14303a;border-top-color:#00f6ff;border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
 .session{margin-top:14px;text-align:center;color:#65848c;font-size:13px;letter-spacing:3px}.controller-url{margin-top:7px;text-align:center;color:#456872;font-size:11px;word-break:break-all}.scan-note{text-align:center;margin-top:7px;color:#00f6ff;font:9px "Press Start 2P";letter-spacing:.5px}
 @keyframes blink{50%{opacity:.25}}
 #game{padding:18px;flex-direction:column;gap:12px}
@@ -43,7 +44,8 @@ body:after{content:"";position:fixed;inset:0;pointer-events:none;z-index:21;box-
     </div>
     <div class="qr-card">
       <div class="qr-frame">
-        <img id="qr" alt="Scan this QR code with the phone controller" decoding="async">
+        <div id="qrLoading" class="qr-loading">OPENING TUNNEL…</div>
+        <img id="qr" alt="Scan this QR code with the phone controller" decoding="async" style="display:none">
         <div id="qrFallback" class="qr-fallback"><strong>PHONE CONTROLLER LINK</strong><span id="fallbackUrl"></span></div>
       </div>
       <div class="session">SESSION // <span id="session">------</span></div>
@@ -195,10 +197,12 @@ body:after{content:"";position:fixed;inset:0;pointer-events:none;z-index:21;box-
         if (!qrResponse.ok || !qrData.qr) throw new Error(qrData.error || 'QR unavailable');
         $('qr').src = qrData.qr;
         $('qr').style.display = 'block';
+        $('qrLoading').style.display = 'none';
         $('qrFallback').style.display = 'none';
       } catch (qrError) {
         console.error(qrError);
         $('qr').style.display = 'none';
+        $('qrLoading').style.display = 'none';
         $('qrFallback').style.display = 'block';
       }
     } catch (error) {
@@ -206,6 +210,7 @@ body:after{content:"";position:fixed;inset:0;pointer-events:none;z-index:21;box-
       $('session').textContent = 'OFFLINE';
       $('controllerUrl').textContent = 'Restart the server and refresh this page.';
       $('qr').style.display = 'none';
+      $('qrLoading').style.display = 'none';
       $('qrFallback').style.display = 'block';
       $('fallbackUrl').textContent = 'SERVER CONNECTION ERROR';
     }
@@ -235,6 +240,16 @@ body:after{content:"";position:fixed;inset:0;pointer-events:none;z-index:21;box-
 
   socket.on('session_info', data => {
     if (data?.session) $('session').textContent = data.session;
+    if (data?.url) {
+      $('controllerUrl').textContent = data.url;
+      $('fallbackUrl').textContent = data.url;
+    }
+    loadSession();
+  });
+
+  // Server emits this once the public tunnel URL is ready.
+  // Re-fetch the QR so the browser card shows the internet-accessible link.
+  socket.on('tunnel_ready', data => {
     if (data?.url) {
       $('controllerUrl').textContent = data.url;
       $('fallbackUrl').textContent = data.url;
