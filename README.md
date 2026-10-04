@@ -87,3 +87,10 @@ The game will have a strong retro arcade feel on both the Host and the Mobile Co
 - Implement the 2-minute timer and win/loss screens ("GAME OVER").
 - Server aggressively disconnects the phone client on Game Over to prepare for the next fresher.
 - Add the 8-bit sound effects and test network latency over local Wi-Fi.
+
+### How to run:
+- Clone the repo
+- Get a ngrok api key
+- Set it as your env variable
+- Install npm (Node packet manager) and use "npm start" to run it
+- Also don't scan the qr in the terminal just search up "http://localhost:3000/" in your browser and run it and it should work with any phone
