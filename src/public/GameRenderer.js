@@ -74,7 +74,7 @@ class GameRenderer {
         const h = this.height || 600;
         ctx.clearRect(0, 0, w, h);
 
-        ctx.fillStyle = '#05070b';
+        ctx.fillStyle = '#08091d';
         ctx.fillRect(0, 0, w, h);
 
         if (!this.state) return;
@@ -88,8 +88,8 @@ class GameRenderer {
         // board glow
         ctx.save();
         ctx.shadowBlur = 30;
-        ctx.shadowColor = '#00f6ff';
-        ctx.strokeStyle = 'rgba(0,246,255,.22)';
+        ctx.shadowColor = '#5279e8';
+        ctx.strokeStyle = 'rgba(98,131,224,.38)';
         ctx.lineWidth = 2;
         ctx.strokeRect(ox, oy, boardSize, boardSize);
         ctx.restore();
@@ -97,10 +97,10 @@ class GameRenderer {
         // tiles
         for (let y = 0; y < n; y++) {
             for (let x = 0; x < n; x++) {
-                ctx.fillStyle = (x + y) % 2 ? '#0b1219' : '#0d171f';
-                ctx.fillRect(ox + x * cell, oy + y * cell, cell - 1, cell - 1);
-                ctx.strokeStyle = 'rgba(45,115,130,.12)';
-                ctx.strokeRect(ox + x * cell, oy + y * cell, cell, cell);
+                ctx.fillStyle = (x + y) % 2 ? '#171a35' : '#1d2141';
+                ctx.fillRect(ox + x * cell, oy + y * cell, cell, cell);
+                ctx.fillStyle = 'rgba(9,10,29,.32)';
+                ctx.fillRect(ox + x * cell, oy + y * cell + cell - 2, cell, 2);
             }
         }
 
@@ -111,7 +111,7 @@ class GameRenderer {
         this.drawMovementVector(ctx, this.lastVector, this.state.robot, ox, oy, cell);
 
         // corner brackets
-        ctx.strokeStyle = '#16d9e3';
+        ctx.strokeStyle = '#657fd0';
         ctx.lineWidth = 3;
         const s = 18;
         [[ox,oy,1,1],[ox+boardSize,oy,-1,1],[ox,oy+boardSize,1,-1],[ox+boardSize,oy+boardSize,-1,-1]]
@@ -124,32 +124,24 @@ class GameRenderer {
 
     drawTarget(ctx, p, ox, oy, cell) {
         if (!p) return;
-        const x = ox + p.x * cell, y = oy + p.y * cell;
-        ctx.save();
-        ctx.shadowBlur = 18; ctx.shadowColor = '#f4ff4f';
-        ctx.strokeStyle = '#f4ff4f'; ctx.lineWidth = 3;
-        ctx.strokeRect(x + cell*.18, y + cell*.18, cell*.64, cell*.64);
-        ctx.strokeRect(x + cell*.31, y + cell*.31, cell*.38, cell*.38);
-        ctx.restore();
-        ctx.fillStyle = 'rgba(244,255,79,.08)';
-        ctx.fillRect(x, y, cell, cell);
+        const x = ox + (p.x + .5) * cell, y = oy + (p.y + .5) * cell, s = cell * .64;
+        // EVE: a tiny hand-drawn block sprite, built from crisp rectangles.
+        const px = s / 12, put = (gx, gy, gw, gh, color) => { ctx.fillStyle = color; ctx.fillRect(Math.round(x-s/2+gx*px), Math.round(y-s/2+gy*px), Math.ceil(gw*px), Math.ceil(gh*px)); };
+        ctx.fillStyle = 'rgba(74,94,177,.18)'; ctx.fillRect(x-cell*.42,y-cell*.42,cell*.84,cell*.84);
+        put(3,0,6,1,'#f4f5ff'); put(2,1,8,1,'#e6e9fa'); put(1,2,10,6,'#f4f5ff');
+        put(2,8,8,2,'#d8def6'); put(4,10,4,1,'#b7c3eb');
+        put(3,3,6,2,'#171a35'); put(4,3,1,1,'#55baff'); put(7,3,1,1,'#55baff');
+        put(0,4,1,3,'#c6d0f2'); put(11,4,1,3,'#c6d0f2');
     }
 
     drawBox(ctx, p, ox, oy, cell) {
         if (!p) return;
-        const x = ox + p.x * cell, y = oy + p.y * cell;
-        ctx.save();
-        ctx.shadowBlur = 14; ctx.shadowColor = '#ff9f1c';
-        ctx.fillStyle = '#ff9f1c';
-        ctx.fillRect(x + cell*.25, y + cell*.25, cell*.5, cell*.5);
-        ctx.strokeStyle = '#ffd166'; ctx.lineWidth = 2;
-        ctx.strokeRect(x + cell*.25, y + cell*.25, cell*.5, cell*.5);
-        ctx.strokeStyle = '#5a2c00';
-        ctx.beginPath();
-        ctx.moveTo(x+cell*.25,y+cell*.25); ctx.lineTo(x+cell*.75,y+cell*.75);
-        ctx.moveTo(x+cell*.75,y+cell*.25); ctx.lineTo(x+cell*.25,y+cell*.75);
-        ctx.stroke();
-        ctx.restore();
+        const x = ox + (p.x + .5) * cell, y = oy + (p.y + .5) * cell, s = cell*.62, px=s/12;
+        const put=(gx,gy,gw,gh,color)=>{ctx.fillStyle=color;ctx.fillRect(Math.round(x-s/2+gx*px),Math.round(y-s/2+gy*px),Math.ceil(gw*px),Math.ceil(gh*px));};
+        // Boot held in WALL-E's rusty gripper, with a little living plant.
+        put(2,6,8,5,'#633d32'); put(1,7,10,3,'#9d6040'); put(2,10,8,2,'#50312e');
+        put(4,3,1,4,'#4f9b54'); put(5,2,3,1,'#75c75d'); put(7,1,2,2,'#4f9b54'); put(3,3,2,1,'#75c75d');
+        put(2,7,8,1,'#d3944c'); put(5,8,2,2,'#342640');
     }
 
     drawMovementVector(ctx, vector, robot, ox, oy, cell) {
@@ -162,7 +154,7 @@ class GameRenderer {
         const ex = cx + Math.sin(rad) * len;
         const ey = cy - Math.cos(rad) * len;
         ctx.save();
-        ctx.strokeStyle = '#00f6ff'; ctx.fillStyle = '#00f6ff'; ctx.lineWidth = 3;
+        ctx.strokeStyle = '#80baff'; ctx.fillStyle = '#80baff'; ctx.lineWidth = 3;
         ctx.setLineDash([7,5]);
         ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(ex,ey); ctx.stroke();
         ctx.setLineDash([]);
@@ -176,7 +168,7 @@ class GameRenderer {
         if (!r) return;
         const cx = ox + (r.x + .5) * cell;
         const cy = oy + (r.y + .5) * cell;
-        const size = cell * .52;
+        const size = cell * .72;
 
         ctx.save();
         ctx.translate(cx, cy);
@@ -189,45 +181,28 @@ class GameRenderer {
             angle: (Number(r.rotation ?? ({ NORTH:0,EAST:90,SOUTH:180,WEST:270 }[r.direction] ?? 0)) * Math.PI) / 180
         };
 
-        ctx.shadowBlur = 22; ctx.shadowColor = '#00f6ff';
-        ctx.fillStyle = '#b9fbff';
-        ctx.fillRect(-size/2, -size/2, size, size);
-        ctx.fillStyle = '#172b35';
-        ctx.fillRect(-size*.4, size*.35, size*.8, size*.13);
-
-        // Fixed body/eyes.
-        ctx.fillStyle = '#14222b';
-        ctx.fillRect(-size*.32, -size*.25, size*.64, size*.42);
-        ctx.fillStyle = '#00f6ff';
-        ctx.fillRect(-size*.2, -size*.12, size*.12, size*.12);
-        ctx.fillRect(size*.08, -size*.12, size*.12, size*.12);
-
-        // A single, clearly cardinal head indicator.
-        ctx.save();
-        ctx.rotate(heading.angle);
-        ctx.fillStyle = '#f4ff4f';
-        ctx.fillRect(-size*.09, -size*.66, size*.18, size*.18);
-        ctx.beginPath();
-        ctx.moveTo(0, -size*.82);
-        ctx.lineTo(-size*.14, -size*.61);
-        ctx.lineTo(size*.14, -size*.61);
-        ctx.closePath();
-        ctx.fill();
-        ctx.restore();
+        const px=size/16, put=(gx,gy,gw,gh,color)=>{ctx.fillStyle=color;ctx.fillRect(Math.round(-size/2+gx*px),Math.round(-size/2+gy*px),Math.ceil(gw*px),Math.ceil(gh*px));};
+        // WALL-E's binocular head, square chassis, and tracked base.
+        put(2,3,12,8,'#b96d2c'); put(3,2,10,2,'#e1a646'); put(1,5,2,5,'#8d4c2d');
+        put(3,11,10,2,'#d49443'); put(2,13,12,2,'#30344d'); put(0,12,4,3,'#4d5265'); put(12,12,4,3,'#4d5265');
+        put(2,13,2,1,'#22263b'); put(6,13,2,1,'#22263b'); put(10,13,2,1,'#22263b');
+        put(3,0,5,5,'#dca951'); put(8,0,5,5,'#dca951'); put(4,1,3,3,'#f1e8cd'); put(9,1,3,3,'#f1e8cd');
+        put(5,2,2,2,'#171a35'); put(10,2,2,2,'#171a35'); put(5,2,1,1,'#83c9fa'); put(10,2,1,1,'#83c9fa');
+        // Direction notch rotates with the programmed heading.
+        ctx.save(); ctx.rotate(heading.angle); put(7,-2,2,3,'#ffdc78'); ctx.restore();
 
         ctx.restore();
-        ctx.save(); ctx.fillStyle = '#dfff3f'; ctx.font = '9px Share Tech Mono, monospace'; ctx.fillText(`${Math.round(r.rotation ?? 0)}°`, cx + size*.4, cy - size*.55); ctx.restore();
+        ctx.save(); ctx.fillStyle = '#f4c35a'; ctx.font = '9px Share Tech Mono, monospace'; ctx.fillText(`${Math.round(r.rotation ?? 0)}°`, cx + size*.4, cy - size*.55); ctx.restore();
 
         if (r.carrying) {
-            ctx.fillStyle = '#ff9f1c';
-            ctx.fillRect(cx - cell*.16, cy - cell*.78, cell*.32, cell*.32);
+            this.drawBox(ctx, {x:r.x + .45,y:r.y - .25}, ox, oy, cell);
         }
     }
 
     drawParticles(ctx, ox, oy, cell) {
         this.particles.forEach(p => {
-            ctx.fillStyle = `rgba(0,246,255,${Math.max(0,p.life)*.35})`;
-            ctx.fillRect(ox + p.x*cell, oy + p.y*cell, 3, 3);
+            ctx.fillStyle = `rgba(128,186,255,${Math.max(0,p.life)*.35})`;
+            ctx.fillRect(Math.round(ox + p.x*cell), Math.round(oy + p.y*cell), 3, 3);
         });
     }
 }

@@ -89,13 +89,11 @@ class GameRenderer {
         ctx.strokeRect(ox, oy, boardSize, boardSize);
         ctx.restore();
 
-        // tiles
+        // tiles — checkerboard fill only, no grid lines
         for (let y = 0; y < n; y++) {
             for (let x = 0; x < n; x++) {
                 ctx.fillStyle = (x + y) % 2 ? '#0b1219' : '#0d171f';
-                ctx.fillRect(ox + x * cell, oy + y * cell, cell - 1, cell - 1);
-                ctx.strokeStyle = 'rgba(45,115,130,.12)';
-                ctx.strokeRect(ox + x * cell, oy + y * cell, cell, cell);
+                ctx.fillRect(ox + x * cell, oy + y * cell, cell, cell);
             }
         }
 

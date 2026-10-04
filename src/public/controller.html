@@ -150,6 +150,17 @@ header{display:flex;justify-content:space-between;align-items:center;border:1px 
 .compass-needle{transform-origin:50px 50px;transition:transform .2s ease;filter:drop-shadow(0 0 3px rgba(0,246,255,.6))}
 .compass-needle .needle{fill:var(--cyan)}.compass-needle .tail{fill:#36535a}.compass-center{fill:var(--lime)}
 @media(max-width:360px){.angle-layout{grid-template-columns:minmax(0,1fr) 82px;gap:5px}.compass{width:82px;height:82px}}
+/* Match the host's hand-built WALL-E storybook palette. */
+:root{--cyan:#78b9ff;--lime:#f4c35a;--orange:#ed7951;--red:#e96d68}
+html,body{background:radial-gradient(circle at 50% 15%,#272b59,#11132f 42%,#08091d 78%);color:#f1eddb}
+body:before{background:repeating-linear-gradient(0deg,rgba(218,224,255,.025) 0 1px,transparent 1px 4px)}
+header,.readout,.control-section,.queue{background:#12142b;border-color:#37375c}
+.dpad{border-radius:4px;background:#171a35;border-color:#555584;box-shadow:inset 0 0 0 5px #10122b}
+.dpad-btn,.btn,.angle-option,.forward-option,.exec,.add-move{border-radius:2px;background:#202343;border-color:#41446b;color:#f1eddb;box-shadow:none}
+.dpad-btn:active,.dpad-btn.pressed,.btn:active,.btn.pressed,.angle-option.selected,.forward-option.selected{background:#30345b;border-color:#f4c35a;color:#f4c35a;box-shadow:none}
+.grab{color:#f1a348}.drop{color:#a8d6ff}.exec{color:#80c3ff;border-color:#80c3ff;background:#171a35}
+.brand span{color:#80c3ff}.link.online i{background:#80c3ff}.timer{color:#f4c35a}
+.mission,.section-label,.control-title,.queue-title,.status-line,.range-note,.selected-info{color:#aaa9c7}
 .angle-option,
 .forward-option{
     min-height:40px;
@@ -185,6 +196,9 @@ header{display:flex;justify-content:space-between;align-items:center;border:1px 
     font-size:7px;
     text-align:center;
 }
+.angle-option,.forward-option{background:#202343;border-color:#41446b;color:#f1eddb;border-radius:2px}
+.angle-option.selected,.forward-option.selected{border-color:#f4c35a;color:#f4c35a;box-shadow:none}
+.selected-info{color:#aaa9c7}.selected-info strong{color:#f1eddb}.range-note{color:#aaa9c7}
 .add-move{
     width:100%;
     min-height:48px;
@@ -194,6 +208,7 @@ header{display:flex;justify-content:space-between;align-items:center;border:1px 
     font:10px 'Press Start 2P';
     touch-action:manipulation;
 }
+.add-move{background:#171a35;color:#80c3ff;border-color:#80c3ff;border-radius:2px}
 .add-move:active{
     transform:translateY(1px);
     background:#0a2026;
@@ -270,14 +285,14 @@ header{display:flex;justify-content:space-between;align-items:center;border:1px 
 
     <div class="turns">
         
-        <button class="btn grab" data-action="GRAB" type="button">GRIP / GRAB</button>
-        <button class="btn drop" data-action="DROP" type="button">DROP</button>
+        <button class="btn grab" data-action="GRAB" type="button">PICK UP PLANT</button>
+        <button class="btn drop" data-action="DROP" type="button">GIVE TO EVE</button>
     </div>
 
     <button class="exec" id="exec" type="button">▶ EXECUTE SEQUENCE</button>
 
     <div class="queue-title">
-        <span>COMMAND BUFFER</span>
+        <span>WALL-E'S ROUTE</span>
         <span id="count">0 / 40</span>
     </div>
     <div class="queue" id="queue">

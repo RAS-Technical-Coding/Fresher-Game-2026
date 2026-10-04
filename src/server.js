@@ -81,7 +81,7 @@ function chooseLANAddress(preferred) {
 
 const session = new SessionManager();
 const sockets = new SocketManager(io, session);
-const game = new GameManager({ gridSize: 10, durationSeconds: 120 });
+const game = new GameManager({ gridSize: 10, durationSeconds: 90 });
 const interpreter = new CommandInterpreter();
 let lanIP = '127.0.0.1';
 let finishing = false;
